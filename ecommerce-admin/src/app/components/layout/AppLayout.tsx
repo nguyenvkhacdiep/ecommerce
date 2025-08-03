@@ -23,7 +23,7 @@ const AppLayoutComponent = ({
 }>) => {
   const pathName = usePathname();
 
-  if (pathName === '/login' || pathName === '/reset-password')
+  if (pathName === '/login' || pathName === '/reset-password' || pathName === '/forgot-password')
     return (
       <Suspense>
         <Layout className="h-screen">{children}</Layout>
