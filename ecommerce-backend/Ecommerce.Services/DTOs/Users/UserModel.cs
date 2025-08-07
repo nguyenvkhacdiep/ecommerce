@@ -39,6 +39,7 @@ public class UserLoginResponseModel
 {
     public UserResponseModel User { get; set; } = null!;
     public string Token { get; set; } = null!;
+    public long TokenExpiresIn { get; set; }
 }
 
 public class ForgotPasswordEmailDto
