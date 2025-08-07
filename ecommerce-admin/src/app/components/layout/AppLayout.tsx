@@ -6,6 +6,7 @@ import { RecoilRoot } from 'recoil';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Suspense } from 'react';
 import Navbar from './Navbar';
+import { CookiesProvider } from 'react-cookie';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,11 +40,13 @@ const AppLayout = ({
   children: React.ReactNode;
 }>) => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <RecoilRoot>
-        <AppLayoutComponent>{children}</AppLayoutComponent>
-      </RecoilRoot>
-    </QueryClientProvider>
+    <CookiesProvider>
+      <QueryClientProvider client={queryClient}>
+        <RecoilRoot>
+          <AppLayoutComponent>{children}</AppLayoutComponent>
+        </RecoilRoot>
+      </QueryClientProvider>
+    </CookiesProvider>
   );
 };
 

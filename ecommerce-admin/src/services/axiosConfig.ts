@@ -1,15 +1,6 @@
-import { showErrorAlert } from '@/utils/alert';
-import axios, { InternalAxiosRequestConfig } from 'axios';
-import { debounce, get } from 'lodash';
+import axios from 'axios';
+import { get } from 'lodash';
 import { Cookies } from 'react-cookie';
-
-const showAuthErrorDebounce = debounce(
-  () => {
-    showErrorAlert('Session time out. You will be redirected to login page in 3 seconds');
-  },
-  3000,
-  { leading: true, trailing: true },
-);
 
 const cookies = new Cookies();
 const axiosInstance = axios.create({
@@ -36,6 +27,17 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   (error) => {
+    const errorStatusCode = get(error, 'response.status');
+
+    if (error && errorStatusCode === 401) {
+      setTimeout(() => {
+        cookies.remove('authToken');
+        localStorage.clear();
+        location.href = '/login';
+      }, 1000);
+
+      return Promise.reject(error);
+    }
     return Promise.reject(error);
   },
 );
