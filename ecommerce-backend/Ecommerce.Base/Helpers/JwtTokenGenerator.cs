@@ -23,7 +23,7 @@ public class JwtTokenGenerator
         _settings = options.Value;
     }
 
-    public string GenerateToken(Guid userId, string username, string role)
+    public (string Token, long ExpiresIn) GenerateToken(Guid userId, string username, string role)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.SecretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -44,7 +44,10 @@ public class JwtTokenGenerator
             signingCredentials: creds
         );
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+        var expiresIn = (long)(_settings.ExpiresInMinutes * 60);
+
+        return (tokenString, expiresIn);
     }
 
     public string GenerateToken(Guid userId, string type)
