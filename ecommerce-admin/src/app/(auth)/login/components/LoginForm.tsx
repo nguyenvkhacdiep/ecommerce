@@ -2,14 +2,14 @@ import CustomForm from '@/app/components/form/Form';
 import FormItem from '@/app/components/form/FormItem';
 import { FormInstance, Input } from 'antd';
 import React from 'react';
-import { ILogin } from '../page';
 import PrimaryButton from '@/app/components/button/PrimaryButton';
 import LinkButton from '@/app/components/button/LinkButton';
 import { useRouter } from 'next/navigation';
+import { ILoginPayload } from '@/services/user/user';
 
 interface ILoginForm {
-  form: FormInstance<ILogin>;
-  onSubmit: (data: ILogin) => void;
+  form: FormInstance<ILoginPayload>;
+  onSubmit: (data: ILoginPayload) => void;
 }
 
 const LoginForm: React.FC<ILoginForm> = ({ form, onSubmit }) => {
@@ -27,13 +27,13 @@ const LoginForm: React.FC<ILoginForm> = ({ form, onSubmit }) => {
       isHideButton
     >
       <FormItem
-        name="username"
-        label="Username"
+        name="email"
+        label="Email"
         validateTrigger={['onChange', 'onBlur']}
         normalize={(value) => value.trim()}
         rules={[{ required: true, message: '${label} is required' }]}
       >
-        <Input maxLength={200} placeholder="Username" />
+        <Input maxLength={200} placeholder="Email" />
       </FormItem>
 
       <FormItem
