@@ -44,25 +44,35 @@ public class AuthService : IAuthService
             .FirstOrDefaultAsync();
 
         if (user == null)
-            throw new BadRequestException("ACCOUNT_INACTIVE", new Dictionary<string, string[]>
+        {
+            var errors = new List<FieldError>
             {
-                { "Email", new[] { "Email is incorrect or account does not exist." } }
-            });
+                new()
+                {
+                    Field = "email",
+                    Issue = "Email is incorrect or account does not exist."
+                }
+            };
+            throw new BadRequestException("INVALID_FIELD", errors);
+        }
 
+        if (!user.IsActive)
+            throw new BadRequestException("Account is inactive. Please check your email or resend activation link.");
 
         var passwordVerificationResult =
             _passwordHasher.VerifyHashedPassword(user, user.Password, userLoginDto.Password);
         if (passwordVerificationResult == PasswordVerificationResult.Failed)
-            throw new BadRequestException("ACCOUNT_INACTIVE", new Dictionary<string, string[]>
+        {
+            var errors = new List<FieldError>
             {
-                { "Password", new[] { "Password is incorrect." } }
-            });
-
-        if (!user.IsActive)
-            throw new BadRequestException("ACCOUNT_INACTIVE", new Dictionary<string, string[]>
-            {
-                { "Account", new[] { "Account is inactive. Please check your email or resend activation link." } }
-            });
+                new()
+                {
+                    Field = "password",
+                    Issue = "Password is incorrect."
+                }
+            };
+            throw new BadRequestException("INVALID_FIELD", errors);
+        }
 
         var (token, expiresIn) = _jwtTokenGenerator.GenerateToken(user.Id, user.Email, user.Role.Name);
 
@@ -81,10 +91,17 @@ public class AuthService : IAuthService
             .FirstOrDefaultAsync();
 
         if (findUser == null)
-            throw new BadRequestException("Validation failed", new Dictionary<string, string[]>
+        {
+            var errors = new List<FieldError>
             {
-                { "Email", new[] { "User not found." } }
-            });
+                new()
+                {
+                    Field = "email",
+                    Issue = "Email is incorrect or account does not exist."
+                }
+            };
+            throw new BadRequestException("INVALID_FIELD", errors);
+        }
 
         var activationToken = _jwtTokenGenerator.GenerateToken(findUser.Id, "validate-account");
         var activationLink = $"{_frontendUrl}/activate?email={findUser.Email}&token={activationToken}";
@@ -106,11 +123,9 @@ public class AuthService : IAuthService
             .FindByCondition(u => u.ActivationToken == token)
             .FirstOrDefaultAsync();
 
-        if (user == null)
-            throw new BadRequestException("Invalid or expired activation link.");
+        if (user == null) throw new BadRequestException("Invalid or expired activation link");
 
-        if (user.IsActive)
-            return "Your account is already activated.";
+        if (user.IsActive) throw new BadRequestException("Your account is already activated.");
 
         user.IsActive = true;
         user.ActivationToken = null;
@@ -130,19 +145,22 @@ public class AuthService : IAuthService
             .FirstOrDefaultAsync();
 
         if (user == null)
-            throw new BadRequestException("Validation failed", new Dictionary<string, string[]>
+        {
+            var errors = new List<FieldError>
             {
-                { "Email", new[] { "User not found." } }
-            });
+                new()
+                {
+                    Field = "email",
+                    Issue = "Email is incorrect or account does not exist."
+                }
+            };
+            throw new BadRequestException("INVALID_FIELD", errors);
+        }
+
 
         if (!user.IsActive)
-            throw new BadRequestException("InactiveAccount", new Dictionary<string, string[]>
-            {
-                {
-                    "Account",
-                    new[] { "Your account is not activated. Please check your email or request a new activation link." }
-                }
-            });
+            throw new BadRequestException(
+                "Your account is not activated. Please check your email or request a new activation link.");
 
         var token = _jwtTokenGenerator.GenerateToken(user.Id, "reset-password");
 
@@ -161,17 +179,13 @@ public class AuthService : IAuthService
     public async Task<string> ResetPassword(ResetPasswordEmailDto resetPasswordEmailDto)
     {
         var checkToken = _jwtTokenGenerator.ValidateToken(resetPasswordEmailDto.Token, "reset-password");
-        if (!checkToken) return "Token is expired.";
+        if (!checkToken) throw new BadRequestException("Invalid or expired activation link.");
 
         var user = await _authRepository
             .FindByCondition(u => u.Email == resetPasswordEmailDto.Email)
             .FirstOrDefaultAsync();
 
-        if (user == null)
-            throw new BadRequestException("Validation failed", new Dictionary<string, string[]>
-            {
-                { "Email", new[] { "User not found." } }
-            });
+        if (user == null) throw new BadRequestException("Email is incorrect or account does not exist.");
 
         // if (_passwordHasher.VerifyHashedPassword(user, user.Password, resetPasswordEmailDto.Password) ==
         //     PasswordVerificationResult.Success)
@@ -181,10 +195,18 @@ public class AuthService : IAuthService
         //     });
 
         if (resetPasswordEmailDto.Password != resetPasswordEmailDto.ConfirmPassword)
-            throw new BadRequestException("Validation failed", new Dictionary<string, string[]>
+        {
+            var errors = new List<FieldError>
             {
-                { "Password", new[] { "Password and Confirm password do not match." } }
-            });
+                new()
+                {
+                    Field = "confirmPassword",
+                    Issue = "Password and Confirm password do not match."
+                }
+            };
+            throw new BadRequestException("INVALID_FIELD", errors);
+        }
+
 
         user.Password = _passwordHasher.HashPassword(user, resetPasswordEmailDto.Password);
         user.UpdatedAt = DateTime.UtcNow;

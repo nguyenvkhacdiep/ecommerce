@@ -1,4 +1,4 @@
-import { IUserResponse } from '@/services/user/user';
+import { IUserResponse } from '@/services/auth/auth';
 import { useEffect, useState } from 'react';
 import { atom, useRecoilState, useRecoilValue } from 'recoil';
 import { recoilPersist } from 'recoil-persist';

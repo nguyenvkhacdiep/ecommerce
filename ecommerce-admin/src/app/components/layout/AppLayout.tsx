@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { Layout } from 'antd';
+import { Layout, App as AntApp } from 'antd';
 import { RecoilRoot } from 'recoil';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Suspense } from 'react';
@@ -24,7 +24,12 @@ const AppLayoutComponent = ({
 }>) => {
   const pathName = usePathname();
 
-  if (pathName === '/login' || pathName === '/reset-password' || pathName === '/forgot-password')
+  if (
+    pathName === '/login' ||
+    pathName === '/reset-password' ||
+    pathName === '/forgot-password' ||
+    pathName === '/token-expired'
+  )
     return (
       <Suspense>
         <Layout className="h-screen">{children}</Layout>
@@ -43,7 +48,9 @@ const AppLayout = ({
     <CookiesProvider>
       <QueryClientProvider client={queryClient}>
         <RecoilRoot>
-          <AppLayoutComponent>{children}</AppLayoutComponent>
+          <AntApp>
+            <AppLayoutComponent>{children}</AppLayoutComponent>
+          </AntApp>
         </RecoilRoot>
       </QueryClientProvider>
     </CookiesProvider>

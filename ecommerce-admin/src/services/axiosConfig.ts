@@ -28,7 +28,8 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     const errorStatusCode = get(error, 'response.status');
-
+    const apiError = new Error();
+    (apiError as any).data = error.response?.data;
     if (error && errorStatusCode === 401) {
       setTimeout(() => {
         cookies.remove('authToken');
@@ -36,9 +37,9 @@ axiosInstance.interceptors.response.use(
         location.href = '/login';
       }, 1000);
 
-      return Promise.reject(error);
+      return Promise.reject(apiError);
     }
-    return Promise.reject(error);
+    return Promise.reject(apiError);
   },
 );
 

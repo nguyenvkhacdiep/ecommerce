@@ -25,7 +25,7 @@ public class GlobalExceptionHandler : IExceptionHandler
             {
                 StatusCode = httpContext.Response.StatusCode,
                 Message = contextFeature.Error.Message,
-                Errors = badRequest?.Errors
+                Errors = badRequest?.ErrorList
             }, cancellationToken);
         }
 

@@ -1,22 +1,27 @@
-import { message } from 'antd';
-import SuccessIcon from '/public/success-icon.svg';
-import ErrorIcon from '/public/info-red-icon.svg';
-import { ArgsProps } from 'antd/es/message';
+import { notification, NotificationArgsProps } from 'antd';
 
-export const showSuccessAlert = (content: React.ReactNode, options?: ArgsProps) => {
-  message.open({
-    icon: <SuccessIcon />,
-    type: 'success',
+export const showSuccessMessage = (
+  message: string,
+  description: string,
+  options?: NotificationArgsProps,
+) => {
+  notification.success({
+    message,
+    description,
+    showProgress: true,
     ...options,
-    content,
   });
 };
 
-export const showErrorAlert = (content: React.ReactNode, options?: ArgsProps) => {
-  message.open({
-    icon: <ErrorIcon />,
-    type: 'error',
+export const showErrorMessage = (
+  message: string,
+  description: string,
+  options?: NotificationArgsProps,
+) => {
+  notification.error({
+    message,
+    description,
+    showProgress: true,
     ...options,
-    content,
   });
 };
