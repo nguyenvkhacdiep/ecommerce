@@ -41,10 +41,17 @@ public class UserService : IUserService
             .FirstOrDefaultAsync();
 
         if (existingUser != null)
-            throw new BadRequestException("Validation failed", new Dictionary<string, string[]>
+        {
+            var errors = new List<FieldError>
             {
-                { "Email", new[] { "Email is already in use." } }
-            });
+                new()
+                {
+                    Field = "email",
+                    Issue = "Email is already in use."
+                }
+            };
+            throw new BadRequestException("INVALID_FIELD", errors);
+        }
 
         var userId = Guid.NewGuid();
         var activationToken = _jwtTokenGenerator.GenerateToken(userId, "validate-account");

@@ -1,18 +1,28 @@
 'use client';
 
 import { Form } from 'antd';
-import React from 'react';
+import React, { useState } from 'react';
 import ForgotPasswordForm from './components/ForgotPasswordForm';
-
-export interface IForgotPassword {
-  email: string;
-}
+import { IForgotPasswordPayload } from '@/services/auth/auth';
+import { useForgotPassword } from '@/hooks/reactQuery/auth/useForgotPassword';
+import { showErrorMessage, showSuccessMessage } from '@/utils/alert';
 
 const ForgotPassword: React.FC = () => {
   const [form] = Form.useForm();
+  const { mutateAsync, isPending } = useForgotPassword();
+  const [error, setError] = useState<Error | null>(null);
 
-  const handleForgotPassword = (data: IForgotPassword) => {
-    console.log(data);
+  const handleForgotPassword = async (payload: IForgotPasswordPayload) => {
+    try {
+      const res = await mutateAsync(payload);
+      showSuccessMessage('Forgot password', res.message);
+    } catch (error: any) {
+      if (!(error as any).data.errors) {
+        showErrorMessage('Forgot Password', (error as any).data.message);
+      } else {
+        setError(error);
+      }
+    }
   };
 
   return (
@@ -20,7 +30,12 @@ const ForgotPassword: React.FC = () => {
       <div className="bg-white h-fit w-3/12 rounded-2xl flex flex-col items-center py-12">
         <div className="font-bold text-2xl">Forgot Password?</div>
         <div className="mt-8">
-          <ForgotPasswordForm form={form} onSubmit={handleForgotPassword} />
+          <ForgotPasswordForm
+            form={form}
+            error={error}
+            loading={isPending}
+            onSubmit={handleForgotPassword}
+          />
         </div>
       </div>
     </div>

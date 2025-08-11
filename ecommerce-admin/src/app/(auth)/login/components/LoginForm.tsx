@@ -1,23 +1,39 @@
 import CustomForm from '@/app/components/form/Form';
 import FormItem from '@/app/components/form/FormItem';
 import { FormInstance, Input } from 'antd';
-import React from 'react';
+import React, { useEffect } from 'react';
 import PrimaryButton from '@/app/components/button/PrimaryButton';
 import LinkButton from '@/app/components/button/LinkButton';
 import { useRouter } from 'next/navigation';
-import { ILoginPayload } from '@/services/user/user';
+import { ILoginPayload } from '@/services/auth/auth';
 
 interface ILoginForm {
   form: FormInstance<ILoginPayload>;
   onSubmit: (data: ILoginPayload) => void;
+  error: Error | null;
+  loading: boolean;
 }
 
-const LoginForm: React.FC<ILoginForm> = ({ form, onSubmit }) => {
+const LoginForm: React.FC<ILoginForm> = ({ form, error, loading, onSubmit }) => {
   const router = useRouter();
 
   const handleNavigateForgotPassword = () => {
     router.push('/forgot-password');
   };
+
+  useEffect(() => {
+    if (error && form) {
+      if (error instanceof Error && (error as any).data.message === 'INVALID_FIELD') {
+        const errors = (error as any)?.data?.errors?.map((error: any) => ({
+          name: error.field,
+          errors: [error.issue],
+        }));
+
+        form.setFields([...errors]);
+      }
+    }
+  }, [error]);
+
   return (
     <CustomForm
       layout="vertical"
@@ -49,7 +65,7 @@ const LoginForm: React.FC<ILoginForm> = ({ form, onSubmit }) => {
         <LinkButton onClick={handleNavigateForgotPassword}>Forgot password?</LinkButton>
       </div>
 
-      <PrimaryButton className="w-full mt-4" htmlType="submit">
+      <PrimaryButton className="w-full mt-4" htmlType="submit" loading={loading}>
         Login
       </PrimaryButton>
     </CustomForm>

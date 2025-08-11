@@ -1,9 +1,9 @@
-import { ILoginPayload, login as loginService } from '@/services/user/user';
+import { ILoginPayload, login as loginService } from '@/services/auth/auth';
 import { useMutation } from '@tanstack/react-query';
 
 export const useLogin = () => {
   const { data, isPending, isSuccess, mutateAsync, isError, error } = useMutation({
-    mutationKey: ['createAccount'],
+    mutationKey: ['login'],
     mutationFn: async (payload: ILoginPayload) => await loginService(payload),
   });
 

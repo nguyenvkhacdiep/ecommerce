@@ -3,18 +3,19 @@ import FormItem from '@/app/components/form/FormItem';
 import { FormInstance, Input } from 'antd';
 import React from 'react';
 import PrimaryButton from '@/app/components/button/PrimaryButton';
-import { IResetPassword } from '../page';
+import { IResetPasswordPayload } from '@/services/auth/auth';
 
 interface IResetPasswordForm {
   form: FormInstance<any>;
   onSubmit: (data: any) => void;
+  loading: boolean;
 }
 
-const ResetPasswordForm: React.FC<IResetPasswordForm> = ({ form, onSubmit }) => {
+const ResetPasswordForm: React.FC<IResetPasswordForm> = ({ form, loading, onSubmit }) => {
   const validateConfirmPassword = ({
     getFieldValue,
   }: {
-    getFieldValue: FormInstance<IResetPassword>['getFieldValue'];
+    getFieldValue: FormInstance<IResetPasswordPayload>['getFieldValue'];
   }) => ({
     validator(_: any, value: string) {
       if (!value || getFieldValue('password') === value) {
@@ -66,7 +67,7 @@ const ResetPasswordForm: React.FC<IResetPasswordForm> = ({ form, onSubmit }) => 
         <Input.Password maxLength={200} placeholder="Confirm Password" />
       </FormItem>
 
-      <PrimaryButton className="w-full mt-4" htmlType="submit">
+      <PrimaryButton className="w-full mt-4" htmlType="submit" loading={loading}>
         Reset Password
       </PrimaryButton>
     </CustomForm>

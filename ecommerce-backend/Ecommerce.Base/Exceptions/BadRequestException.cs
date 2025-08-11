@@ -1,11 +1,18 @@
 ﻿namespace Ecommerce.Base.Exceptions;
 
+public class FieldError
+{
+    public string Field { get; set; }
+    public string Issue { get; set; }
+}
+
 public class BadRequestException : Exception
 {
-    public BadRequestException(string message, Dictionary<string, string[]>? errors = null) : base(message)
+    public BadRequestException(string message, List<FieldError>? errors = null)
+        : base(message)
     {
-        Errors = errors;
+        ErrorList = errors;
     }
 
-    public Dictionary<string, string[]>? Errors { get; }
+    public List<FieldError>? ErrorList { get; }
 }

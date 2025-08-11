@@ -1,22 +1,38 @@
 import CustomForm from '@/app/components/form/Form';
 import FormItem from '@/app/components/form/FormItem';
 import { FormInstance, Input } from 'antd';
-import React from 'react';
-import { IForgotPassword } from '../page';
+import React, { useEffect } from 'react';
 import PrimaryButton from '@/app/components/button/PrimaryButton';
 import { useRouter } from 'next/navigation';
 import LinkButton from '@/app/components/button/LinkButton';
+import { IForgotPasswordPayload } from '@/services/auth/auth';
 
 interface IForgotPasswordForm {
-  form: FormInstance<IForgotPassword>;
-  onSubmit: (data: IForgotPassword) => void;
+  form: FormInstance<IForgotPasswordPayload>;
+  onSubmit: (data: IForgotPasswordPayload) => void;
+  error: Error | null;
+  loading: boolean;
 }
 
-const ForgotPasswordForm: React.FC<IForgotPasswordForm> = ({ form, onSubmit }) => {
+const ForgotPasswordForm: React.FC<IForgotPasswordForm> = ({ form, error, loading, onSubmit }) => {
   const router = useRouter();
+
   const handleBackLogin = () => {
     router.push('/login');
   };
+
+  useEffect(() => {
+    if (error && form) {
+      if (error instanceof Error && (error as any).data.message === 'INVALID_FIELD') {
+        const errors = (error as any)?.data?.errors?.map((error: any) => ({
+          name: error.field,
+          errors: [error.issue],
+        }));
+
+        form.setFields([...errors]);
+      }
+    }
+  }, [error]);
 
   return (
     <CustomForm
@@ -42,7 +58,7 @@ const ForgotPasswordForm: React.FC<IForgotPasswordForm> = ({ form, onSubmit }) =
         <Input maxLength={200} placeholder="Email" />
       </FormItem>
 
-      <PrimaryButton className="w-full mt-4" htmlType="submit">
+      <PrimaryButton className="w-full mt-4" htmlType="submit" loading={loading}>
         Send Email
       </PrimaryButton>
 
