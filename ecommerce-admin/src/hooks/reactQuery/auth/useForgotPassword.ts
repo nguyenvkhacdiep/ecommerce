@@ -1,4 +1,4 @@
-import { forgotPassword, IForgotPasswordPayload } from '@/services/auth/auth';
+import { forgotPassword, IForgotPasswordPayload } from '@/services/auth';
 import { useMutation } from '@tanstack/react-query';
 
 export const useForgotPassword = () => {

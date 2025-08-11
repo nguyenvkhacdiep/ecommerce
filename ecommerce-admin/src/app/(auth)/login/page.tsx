@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import LoginForm from './components/LoginForm';
 import LoginTitle from './components/LoginTitle';
 import { useLogin } from '@/hooks/reactQuery/auth/useLogin';
-import { ILoginPayload } from '@/services/auth/auth';
+import { ILoginPayload } from '@/services/auth';
 import { useSetRecoilState } from 'recoil';
 import { selectedUserDetailAtom } from '@/recoil/atoms/userDetailAtom';
 import useTokenCookies from '@/hooks/useTokenCookies';

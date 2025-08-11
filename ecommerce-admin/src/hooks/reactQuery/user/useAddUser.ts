@@ -1,10 +1,10 @@
-import { IResetPasswordPayload, resetPassword } from '@/services/auth';
+import { addUser, IAddUserPayload } from '@/services/user';
 import { useMutation } from '@tanstack/react-query';
 
-export const useResetPassword = () => {
+export const useAddUser = () => {
   const { data, isPending, isSuccess, mutateAsync, isError, error } = useMutation({
-    mutationKey: ['reset-password'],
-    mutationFn: async (payload: IResetPasswordPayload) => await resetPassword(payload),
+    mutationKey: ['add-user'],
+    mutationFn: async (payload: IAddUserPayload) => await addUser(payload),
   });
 
   return {

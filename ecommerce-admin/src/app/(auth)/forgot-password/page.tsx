@@ -3,7 +3,7 @@
 import { Form } from 'antd';
 import React, { useState } from 'react';
 import ForgotPasswordForm from './components/ForgotPasswordForm';
-import { IForgotPasswordPayload } from '@/services/auth/auth';
+import { IForgotPasswordPayload } from '@/services/auth';
 import { useForgotPassword } from '@/hooks/reactQuery/auth/useForgotPassword';
 import { showErrorMessage, showSuccessMessage } from '@/utils/alert';
 

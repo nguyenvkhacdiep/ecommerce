@@ -3,15 +3,15 @@ import FormItem from '@/app/components/form/FormItem';
 import { FormInstance, Input } from 'antd';
 import React from 'react';
 import PrimaryButton from '@/app/components/button/PrimaryButton';
-import { IResetPasswordPayload } from '@/services/auth/auth';
+import { IResetPasswordPayload } from '@/services/auth';
 
-interface IResetPasswordForm {
+type ResetPasswordFormProps = {
   form: FormInstance<any>;
   onSubmit: (data: any) => void;
   loading: boolean;
-}
+};
 
-const ResetPasswordForm: React.FC<IResetPasswordForm> = ({ form, loading, onSubmit }) => {
+const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ form, loading, onSubmit }) => {
   const validateConfirmPassword = ({
     getFieldValue,
   }: {
