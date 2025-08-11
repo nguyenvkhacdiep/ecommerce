@@ -20,10 +20,37 @@ public static class ServiceExtensions
 
         services.AddSwaggerGen(c =>
         {
+            c.OperationFilter<FileUploadOperationFilter>();
+
+            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "Bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
+                Description = "Nhập vào dạng: Bearer {token}"
+            });
+
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+
             c.SwaggerDoc("v1", new OpenApiInfo
             {
                 Title = "Ecommerce API",
-                Version = "v1",
+                Version = "1.0.0",
                 Description = "API cho hệ thống thương mại điện tử",
                 Contact = new OpenApiContact
                 {
@@ -33,11 +60,13 @@ public static class ServiceExtensions
             });
         });
 
+
+        services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+        services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
-        services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+        services.AddScoped<IFirebaseStorageService, FirebaseStorageService>();
         services.AddScoped<JwtTokenGenerator>();
-        services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
     }
 
     public static void RepositoryConfiguration(this IServiceCollection services, IConfiguration configuration)

@@ -6,6 +6,7 @@ public class UserModel
     public string Username { get; set; }
     public string Email { get; set; }
     public bool IsActive { get; set; } = false;
+    public string UrlAvatar { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public Guid RoleId { get; set; }
@@ -17,6 +18,7 @@ public class UserResponseModel
     public string Username { get; set; }
     public string Email { get; set; }
     public bool IsActive { get; set; }
+    public string UrlAvatar { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public RoleModel Role { get; set; }
@@ -26,6 +28,7 @@ public class AddUserDto
 {
     public string Username { get; set; } = null!;
     public string Email { get; set; } = null!;
+    public string UrlAvatar { get; set; } = null!;
     public Guid RoleId { get; set; }
 }
 

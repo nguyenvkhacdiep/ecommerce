@@ -63,7 +63,7 @@ public class AuthController : ControllerBase
         return Ok(new { message });
     }
 
-    [HttpPost("get-all-roles")]
+    [HttpGet("get-all-roles")]
     public async Task<IActionResult> GetAllRole()
     {
         var roles = await _authService.GetAllRoles();

@@ -1,5 +1,6 @@
 ﻿using Ecommerce.Services.DTOs.Users;
 using Ecommerce.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce.API.Controllers;
@@ -15,6 +16,7 @@ public class UsersController : ControllerBase
         _userService = userService;
     }
 
+    [Authorize(Roles = "Super Admin")]
     [HttpGet("get-all-users")]
     public async Task<IActionResult> GetUsers([FromQuery] UserParameters userParameters)
     {
@@ -23,6 +25,7 @@ public class UsersController : ControllerBase
         return Ok(users);
     }
 
+    [Authorize(Roles = "Super Admin")]
     [HttpPost("add-user")]
     public async Task<IActionResult> AddUser([FromBody] AddUserDto addUserDto)
     {
