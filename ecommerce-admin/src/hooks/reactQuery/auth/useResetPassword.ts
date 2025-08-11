@@ -1,4 +1,4 @@
-import { IResetPasswordPayload, resetPassword } from '@/services/auth/auth';
+import { IResetPasswordPayload, resetPassword } from '@/services/auth';
 import { useMutation } from '@tanstack/react-query';
 
 export const useResetPassword = () => {

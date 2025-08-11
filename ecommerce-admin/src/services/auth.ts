@@ -1,4 +1,5 @@
-import axiosInstance from '../axiosConfig';
+import { IMessageResponse } from '@/common/type';
+import axiosInstance from './axiosConfig';
 
 export interface ILoginPayload {
   email: string;
@@ -36,8 +37,9 @@ export interface IResetPasswordPayload {
   confirmPassword: string;
 }
 
-export interface IMessageResponse {
-  message: string;
+export interface IRoleResponse {
+  id: string;
+  name: string;
 }
 
 export async function login(payload: ILoginPayload): Promise<IUserLoginResponse> {
@@ -57,5 +59,10 @@ export async function checkResetPasswordToken(token: string): Promise<boolean> {
 
 export async function resetPassword(payload: IResetPasswordPayload): Promise<IMessageResponse> {
   const response = await axiosInstance.post('/Auth/reset-password', payload);
+  return response.data;
+}
+
+export async function getAllRoles(): Promise<IRoleResponse[]> {
+  const response = await axiosInstance.get('/Auth/get-all-roles');
   return response.data;
 }

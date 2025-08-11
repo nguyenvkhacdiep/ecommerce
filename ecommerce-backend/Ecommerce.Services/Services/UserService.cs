@@ -63,6 +63,7 @@ public class UserService : IUserService
             Email = addUserDto.Email,
             IsActive = false,
             ActivationToken = activationToken,
+            UrlAvatar = addUserDto.UrlAvatar,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             RoleId = addUserDto.RoleId
@@ -87,6 +88,7 @@ public class UserService : IUserService
             Username = user.Username,
             Email = user.Email,
             IsActive = user.IsActive,
+            UrlAvatar = user.UrlAvatar,
             CreatedAt = user.CreatedAt,
             UpdatedAt = user.UpdatedAt,
             Role = roleMapper
@@ -96,9 +98,11 @@ public class UserService : IUserService
     }
 
 
-    public async Task<PageList<UserModel>> GetAllUsers(UserParameters userParameters)
+    public async Task<PageList<UserResponseModel>> GetAllUsers(UserParameters userParameters)
     {
         var query = _userRepository.FindAll();
+
+        query = query.Include(u => u.Role);
 
         if (!string.IsNullOrWhiteSpace(userParameters.SearchKey))
             query = query.Where(x =>
@@ -113,8 +117,9 @@ public class UserService : IUserService
             .Take(userParameters.PageSize)
             .ToListAsync();
 
-        var userResponse = _mapper.Map<List<UserModel>>(users);
+        var userResponse = _mapper.Map<List<UserResponseModel>>(users);
 
-        return new PageList<UserModel>(userResponse, query.Count(), userParameters.PageNumber, userParameters.PageSize);
+        return new PageList<UserResponseModel>(userResponse, query.Count(), userParameters.PageNumber,
+            userParameters.PageSize);
     }
 }

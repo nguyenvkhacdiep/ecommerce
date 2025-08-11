@@ -8,6 +8,7 @@ public class User
     public string Email { get; set; }
     public bool IsActive { get; set; }
     public string? ActivationToken { get; set; }
+    public string? UrlAvatar { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public Guid RoleId { get; set; }

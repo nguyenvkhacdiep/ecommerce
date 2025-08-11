@@ -5,7 +5,7 @@ import React, { useEffect } from 'react';
 import PrimaryButton from '@/app/components/button/PrimaryButton';
 import { useRouter } from 'next/navigation';
 import LinkButton from '@/app/components/button/LinkButton';
-import { IForgotPasswordPayload } from '@/services/auth/auth';
+import { IForgotPasswordPayload } from '@/services/auth';
 
 interface IForgotPasswordForm {
   form: FormInstance<IForgotPasswordPayload>;

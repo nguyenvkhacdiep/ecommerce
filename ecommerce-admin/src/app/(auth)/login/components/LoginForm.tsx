@@ -5,16 +5,16 @@ import React, { useEffect } from 'react';
 import PrimaryButton from '@/app/components/button/PrimaryButton';
 import LinkButton from '@/app/components/button/LinkButton';
 import { useRouter } from 'next/navigation';
-import { ILoginPayload } from '@/services/auth/auth';
+import { ILoginPayload } from '@/services/auth';
 
-interface ILoginForm {
+type LoginFormProps = {
   form: FormInstance<ILoginPayload>;
   onSubmit: (data: ILoginPayload) => void;
   error: Error | null;
   loading: boolean;
-}
+};
 
-const LoginForm: React.FC<ILoginForm> = ({ form, error, loading, onSubmit }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ form, error, loading, onSubmit }) => {
   const router = useRouter();
 
   const handleNavigateForgotPassword = () => {
@@ -47,7 +47,13 @@ const LoginForm: React.FC<ILoginForm> = ({ form, error, loading, onSubmit }) => 
         label="Email"
         validateTrigger={['onChange', 'onBlur']}
         normalize={(value) => value.trim()}
-        rules={[{ required: true, message: '${label} is required' }]}
+        rules={[
+          { required: true, message: '${label} is required' },
+          {
+            type: 'email',
+            message: 'Invalid email format. Please enter a valid email (e.g., user@domain.com).',
+          },
+        ]}
       >
         <Input maxLength={200} placeholder="Email" />
       </FormItem>

@@ -4,6 +4,9 @@ using Ecommerce.Repositories.Models;
 using Ecommerce.Services.Interfaces;
 using Ecommerce.Services.Profiles;
 using Ecommerce.Services.Services;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+using Google.Cloud.Storage.V1;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -75,8 +78,26 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireRole("Admin"));
+});
+
 builder.Services.Configure<FrontendSettings>(
     builder.Configuration.GetSection("Frontend"));
+
+var firebasePath = Path.Combine(AppContext.BaseDirectory,
+    builder.Configuration["Firebase:ServiceAccountKeyPath"]);
+
+FirebaseApp.Create(new AppOptions
+{
+    Credential = GoogleCredential.FromFile(firebasePath)
+});
+
+builder.Services.AddSingleton(StorageClient.Create(
+    GoogleCredential.FromFile(firebasePath)
+));
 
 builder.Services.AddAuthorization();
 

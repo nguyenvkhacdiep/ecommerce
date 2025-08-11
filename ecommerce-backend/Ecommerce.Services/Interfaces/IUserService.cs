@@ -5,6 +5,6 @@ namespace Ecommerce.Services.Interfaces;
 
 public interface IUserService
 {
-    Task<PageList<UserModel>> GetAllUsers(UserParameters userParameters);
+    Task<PageList<UserResponseModel>> GetAllUsers(UserParameters userParameters);
     Task<UserResponseModel> AddUserAsync(AddUserDto addUserDto);
 }
