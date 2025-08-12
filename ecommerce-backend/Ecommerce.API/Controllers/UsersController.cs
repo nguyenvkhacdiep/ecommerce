@@ -34,4 +34,24 @@ public class UsersController : ControllerBase
         var createdUser = await _userService.AddUserAsync(addUserDto);
         return CreatedAtAction(nameof(GetUsers), new { id = createdUser.Id }, createdUser);
     }
+
+    [Authorize(Roles = "Super Admin")]
+    [HttpPut("edit-user")]
+    public async Task<IActionResult> EditUser(Guid id, AddUserDto userUpdateDto)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var message = await _userService.EditUserAsync(id, userUpdateDto);
+        return Ok(new { message });
+    }
+
+    [Authorize(Roles = "Super Admin")]
+    [HttpPatch("inactive-user")]
+    public async Task<IActionResult> EditUser(Guid id)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var message = await _userService.InactiveUserAsync(id);
+        return Ok(new { message });
+    }
 }
