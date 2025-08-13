@@ -103,7 +103,7 @@ public class AuthService : IAuthService
             throw new BadRequestException("INVALID_FIELD", errors);
         }
 
-        var activationToken = _jwtTokenGenerator.GenerateToken(findUser.Id, "validate-account");
+        var activationToken = _jwtTokenGenerator.GenerateTokenByType(findUser.Id, "validate-account");
         var activationLink = $"{_frontendUrl}/activate?email={findUser.Email}&token={activationToken}";
 
         findUser.ActivationToken = activationToken;
@@ -134,7 +134,7 @@ public class AuthService : IAuthService
         _authRepository.Update(user);
         await _authRepository.SaveChangesAsync();
 
-        var resetPasswordToken = _jwtTokenGenerator.GenerateToken(user.Id, "reset-password");
+        var resetPasswordToken = _jwtTokenGenerator.GenerateTokenByType(user.Id, "reset-password");
         return new { resetPasswordToken };
     }
 
@@ -162,7 +162,7 @@ public class AuthService : IAuthService
             throw new BadRequestException(
                 "Your account is not activated. Please check your email or request a new activation link.");
 
-        var token = _jwtTokenGenerator.GenerateToken(user.Id, "reset-password");
+        var token = _jwtTokenGenerator.GenerateTokenByType(user.Id, "reset-password");
 
         var resetLink = $"{_frontendUrl}/reset-password?email={user.Email}&token={token}";
 
@@ -219,7 +219,7 @@ public class AuthService : IAuthService
 
     public async Task<List<RoleModel>> GetAllRoles()
     {
-        var roles = _roleRepository.FindAll();
+        var roles = _roleRepository.FindAll().Where(r => r.Name != "Super Admin");
         var rolesResponse = _mapper.Map<List<RoleModel>>(roles);
         return rolesResponse;
     }

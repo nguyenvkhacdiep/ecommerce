@@ -6,6 +6,8 @@ import { PagingRequest } from '@/common/type';
 import { useGetAllUsers } from '@/hooks/reactQuery/user/useGetAllUsers';
 import { useRefetchTableData } from '@/hooks/useFetchingDataHandler';
 import AccountTable from './components/AccountTable';
+import { useInactiveUser } from '@/hooks/reactQuery/user/useInactiveUser';
+import { showErrorMessage, showSuccessMessage } from '@/utils/alert';
 
 const Page = () => {
   const searchParams = useSearchParams();
@@ -17,12 +19,25 @@ const Page = () => {
   });
 
   const { data, isFetching, refetch } = useGetAllUsers(params);
+  const { mutateAsync: inactiveUserMutate } = useInactiveUser();
 
   useRefetchTableData<PagingRequest>({
     params,
     setParams,
     refetch,
   });
+
+  const handleInactiveUser = async (userId: string) => {
+    try {
+      const result = await inactiveUserMutate(userId);
+      showSuccessMessage('Inactive User', result.message);
+      refetch();
+    } catch (error: any) {
+      if (!(error as any).data.errors) {
+        showErrorMessage('Inactive User', (error as any).data.message);
+      }
+    }
+  };
 
   return (
     <div>
@@ -33,6 +48,7 @@ const Page = () => {
           params={params}
           setParams={setParams}
           loading={isFetching}
+          onInactiveUser={handleInactiveUser}
         />
       </div>
     </div>

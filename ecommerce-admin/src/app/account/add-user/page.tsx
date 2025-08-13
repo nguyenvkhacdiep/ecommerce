@@ -42,7 +42,7 @@ const Page = () => {
   return (
     <div className="w-full h-screen">
       <Title handleBack={handleBack} />
-      <div className="h-full flex justify-center items-center">
+      <div className="flex ml-8 mt-12 bg-white p-8 rounded-2xl w-fit">
         <AddUserForm
           form={form}
           error={error}

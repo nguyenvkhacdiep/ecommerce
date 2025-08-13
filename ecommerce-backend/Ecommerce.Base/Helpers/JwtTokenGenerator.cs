@@ -50,7 +50,7 @@ public class JwtTokenGenerator
         return (tokenString, expiresIn);
     }
 
-    public string GenerateToken(Guid userId, string type)
+    public string GenerateTokenByType(Guid userId, string type)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.SecretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

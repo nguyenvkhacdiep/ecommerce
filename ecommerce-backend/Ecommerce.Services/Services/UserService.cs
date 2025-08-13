@@ -54,7 +54,7 @@ public class UserService : IUserService
         }
 
         var userId = Guid.NewGuid();
-        var activationToken = _jwtTokenGenerator.GenerateToken(userId, "validate-account");
+        var activationToken = _jwtTokenGenerator.GenerateTokenByType(userId, "validate-account");
 
         var user = new User
         {
@@ -97,16 +97,15 @@ public class UserService : IUserService
         return createdUser;
     }
 
-
     public async Task<PageList<UserResponseModel>> GetAllUsers(UserParameters userParameters)
     {
         var query = _userRepository.FindAll();
 
-        query = query.Include(u => u.Role);
+        query = query.Include(u => u.Role).Where(u => u.Role.Name != "Super Admin");
 
         if (!string.IsNullOrWhiteSpace(userParameters.SearchKey))
             query = query.Where(x =>
-                x.Username != null && x.Username.Contains(userParameters.SearchKey));
+                x.Email != null && x.Email.Contains(userParameters.SearchKey));
 
         if (string.IsNullOrWhiteSpace(userParameters.OrderBy))
             query = query.OrderByDescending(x => x.CreatedAt).ThenBy(x => x.CreatedAt);
@@ -121,5 +120,51 @@ public class UserService : IUserService
 
         return new PageList<UserResponseModel>(userResponse, query.Count(), userParameters.PageNumber,
             userParameters.PageSize);
+    }
+
+    public async Task<string> EditUserAsync(Guid id, AddUserDto userUpdateDto)
+    {
+        var findUser = await _userRepository.FindByCondition(u => u.Id == id).FirstOrDefaultAsync();
+
+        if (findUser == null) throw new BadRequestException("User not found.");
+
+        findUser.Email = userUpdateDto.Email;
+        findUser.Username = userUpdateDto.Username;
+        findUser.RoleId = userUpdateDto.RoleId;
+        findUser.UrlAvatar = userUpdateDto.UrlAvatar;
+        findUser.UpdatedAt = DateTime.UtcNow;
+
+        _userRepository.Update(findUser);
+        await _userRepository.SaveChangesAsync();
+
+        return "User has been updated successfully.";
+    }
+
+    public async Task<string> InactiveUserAsync(Guid id)
+    {
+        var findUser = await _userRepository.FindByCondition(u => u.Id == id).FirstOrDefaultAsync();
+
+        if (findUser == null) throw new BadRequestException("User not found.");
+
+        if (!findUser.IsActive) throw new BadRequestException("User is inactive.");
+
+        findUser.IsActive = false;
+        findUser.UpdatedAt = DateTime.UtcNow;
+
+        _userRepository.Update(findUser);
+        await _userRepository.SaveChangesAsync();
+
+        return "User has been deactivated successfully.";
+    }
+
+    public async Task<UserResponseModel> GetUserById(Guid id)
+    {
+        var findUser = await _userRepository.FindByCondition(u => u.Id == id).Include(u => u.Role)
+            .FirstOrDefaultAsync();
+
+        if (findUser == null) throw new BadRequestException("User not found.");
+
+        var user = _mapper.Map<UserResponseModel>(findUser);
+        return user;
     }
 }

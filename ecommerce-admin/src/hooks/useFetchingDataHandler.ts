@@ -38,14 +38,12 @@ export const useRefetchTableData = <T>({
         const isValueEmptyArray = isArray(value) && isEmpty(value);
         const isDefaultPage = key === 'pageIndex' && value === 1;
         const isDefaultPageSize = key === 'pageSize' && value === 10;
-        const isIgnoreSearchKey = key === 'searchKey';
 
         if (
           !value ||
           isDefaultPage ||
           isDefaultPageSize ||
           isValueEmptyArray ||
-          isIgnoreSearchKey ||
           shouldNotBeAddedToQueryString?.(key, value, currentParams)
         ) {
           return previousQueryString;

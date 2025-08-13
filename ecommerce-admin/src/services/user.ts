@@ -1,4 +1,4 @@
-import { PagingData, PagingRequest } from '@/common/type';
+import { IMessageResponse, PagingData, PagingRequest } from '@/common/type';
 import axiosInstance from './axiosConfig';
 import { queryParamsBuilder } from '@/utils/common';
 import { IUserResponse } from './auth';
@@ -15,7 +15,25 @@ export async function getAllUsers(option?: PagingRequest): Promise<PagingData<IU
   return response.data;
 }
 
+export async function getUserById(id: string): Promise<IUserResponse> {
+  const response = await axiosInstance.get(`/Users/get-user/${id}`);
+  return response.data;
+}
+
 export async function addUser(payload: IAddUserPayload): Promise<string> {
   const response = await axiosInstance.post('/Users/add-user', payload);
+  return response.data;
+}
+
+export async function editUser(
+  userId: string,
+  payload: IAddUserPayload,
+): Promise<IMessageResponse> {
+  const response = await axiosInstance.put(`/Users/edit-user/${userId}`, payload);
+  return response.data;
+}
+
+export async function inactiveUser(userId: string): Promise<IMessageResponse> {
+  const response = await axiosInstance.patch(`/Users/inactive-user/${userId}`);
   return response.data;
 }

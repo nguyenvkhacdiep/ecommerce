@@ -1,4 +1,5 @@
 using System.Text;
+using Ecommerce.API.Authorization;
 using Ecommerce.API.Extensions;
 using Ecommerce.Repositories.Models;
 using Ecommerce.Services.Interfaces;
@@ -8,6 +9,7 @@ using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Storage.V1;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using JwtSettings = Ecommerce.Base.Helpers.JwtSettings;
@@ -82,7 +84,12 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy =>
         policy.RequireRole("Admin"));
+
+    options.AddPolicy("SuperAdminOrSelf", policy =>
+        policy.Requirements.Add(new SuperAdminOrSelfRequirement()));
 });
+
+builder.Services.AddSingleton<IAuthorizationHandler, SuperAdminOrSelfHandler>();
 
 builder.Services.Configure<FrontendSettings>(
     builder.Configuration.GetSection("Frontend"));

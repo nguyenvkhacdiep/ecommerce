@@ -9,6 +9,8 @@ import { PagingRequest } from '@/common/type';
 import { ActionItem } from './ActionItem';
 import CommonTag from '@/app/components/tag/CommonTag';
 import TableAction from '@/app/components/table/TableAction';
+import AccountTableHeader from './AccountTableHeader';
+import Link from 'next/link';
 
 const COLUMNS: TableProps['columns'] = [
   {
@@ -23,6 +25,7 @@ const COLUMNS: TableProps['columns'] = [
     key: 'id',
     width: '20%',
     sorter: true,
+    render: (value) => <Link href={`/account/${value}`}>{value}</Link>,
   },
   {
     title: 'Username',
@@ -63,9 +66,17 @@ type Props = {
   total: number;
   params: PagingRequest;
   setParams: (v: PagingRequest) => void;
+  onInactiveUser: (userId: string) => void;
 } & TableProps;
 
-const AccountTable: React.FC<Props> = ({ list, total, params, setParams, ...props }) => {
+const AccountTable: React.FC<Props> = ({
+  list,
+  total,
+  params,
+  setParams,
+  onInactiveUser,
+  ...props
+}) => {
   const { open, toggleModal } = useModalHandler();
   const [selectedRow, setSelectedRow] = useState<IUserResponse>();
 
@@ -80,7 +91,13 @@ const AccountTable: React.FC<Props> = ({ list, total, params, setParams, ...prop
       render: (_: any, record: any) => {
         return (
           <TableAction
-            content={<ActionItem record={record} onDeleteAccount={onDeleteAccount} />}
+            content={
+              <ActionItem
+                record={record}
+                onDeleteAccount={onDeleteAccount}
+                onInactiveUser={onInactiveUser}
+              />
+            }
             trigger="click"
           />
         );
@@ -111,6 +128,7 @@ const AccountTable: React.FC<Props> = ({ list, total, params, setParams, ...prop
         scroll={{
           y: 'calc(100vh - 390px)',
         }}
+        title={() => <AccountTableHeader params={params} setParams={setParams} />}
         {...props}
       />
       {/* {!!selectedRow && (
