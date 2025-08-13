@@ -16,6 +16,7 @@ export interface IUserResponse {
   username: string;
   email: string;
   isActive: boolean;
+  urlAvatar: string;
   createdAt: Date;
   updatedAt: Date;
   role: IRole;

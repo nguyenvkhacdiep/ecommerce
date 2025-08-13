@@ -5,11 +5,13 @@ import CustomForm from '@/app/components/form/Form';
 import { Options } from '@/common/type';
 import { useDeleteFile } from '@/hooks/reactQuery/upload/useDeleteFile';
 import { useUploadFile } from '@/hooks/reactQuery/upload/useUploadFile';
-import { IRoleResponse } from '@/services/auth';
+import { useFormChanged } from '@/hooks/useFormChanged';
+import { IUserResponse } from '@/services/auth';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { Flex, FormInstance, GetProp, Input, Select, Upload, UploadProps } from 'antd';
 import FormItem from 'antd/es/form/FormItem';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
 type AddUserFormProps = {
@@ -18,13 +20,42 @@ type AddUserFormProps = {
   roles: Options;
   error: Error | null;
   loading: boolean;
+  onlyView?: boolean;
+  user?: IUserResponse;
 };
 
-const AddUserForm: React.FC<AddUserFormProps> = ({ form, error, roles, loading, onSubmit }) => {
+const AddUserForm: React.FC<AddUserFormProps> = ({
+  form,
+  error,
+  roles,
+  loading,
+  onlyView = false,
+  user,
+  onSubmit,
+}) => {
   const { mutateAsync, isPending } = useUploadFile();
   const { mutateAsync: deleteFileMutateAsync } = useDeleteFile();
   const [imageUrl, setImageUrl] = useState<string>();
   const [preFileName, setPrefileName] = useState<string>();
+  const router = useRouter();
+  const { isChanged, handleValuesChange } = useFormChanged(form, {
+    username: user?.username,
+    email: user?.email,
+    urlAvatar: user?.urlAvatar,
+    roleId: user?.role.id,
+  });
+
+  useEffect(() => {
+    if (user) {
+      form.setFieldsValue({
+        username: user.username,
+        email: user.email,
+        urlAvatar: user.urlAvatar,
+        roleId: user.role.id,
+      });
+      setImageUrl(user.urlAvatar);
+    }
+  }, [JSON.stringify(user)]);
 
   useEffect(() => {
     if (error && form) {
@@ -61,84 +92,106 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ form, error, roles, loading, 
     form.setFields([{ name: 'urlAvatar', value: response.url, errors: [] }]);
   };
 
+  const handleEditUserClick = () => {
+    router.push(`/account/${user?.id}${onlyView ? '?isEdit=true' : ''}`);
+  };
+
   return (
-    <CustomForm
-      layout="vertical"
-      form={form}
-      onFinish={onSubmit}
-      style={{ width: 400 }}
-      isHideButton
-    >
-      <FormItem
-        name="urlAvatar"
-        label="Avatar"
-        validateTrigger={['onChange', 'onBlur']}
-        normalize={(value) => value.trim()}
+    <div className="flex flex-col">
+      {user && (
+        <div className="flex justify-end mb-6">
+          <PrimaryButton onClick={handleEditUserClick}>
+            {onlyView ? 'Edit' : 'Cancel'}
+          </PrimaryButton>
+        </div>
+      )}
+      <CustomForm
+        layout="vertical"
+        form={form}
+        onFinish={onSubmit}
+        style={{ width: 400 }}
+        isHideButton
+        disabled={onlyView}
+        onValuesChange={handleValuesChange}
       >
-        <Flex gap="middle" wrap>
-          <Upload
-            name="file"
-            listType="picture-circle"
-            className="avatar-uploader"
-            showUploadList={false}
-            onChange={handleSelectedAvatar}
+        <FormItem
+          name="urlAvatar"
+          label="Avatar"
+          validateTrigger={['onChange', 'onBlur']}
+          normalize={(value) => value.trim()}
+        >
+          <Flex gap="middle" wrap>
+            <Upload
+              name="file"
+              listType="picture-circle"
+              className="avatar-uploader"
+              showUploadList={false}
+              onChange={handleSelectedAvatar}
+            >
+              {imageUrl ? (
+                <span className="w-[100px] h-[100px] relative">
+                  <Image
+                    src={imageUrl}
+                    alt="avatar"
+                    className="rounded-[999px] h-full w-full absolute"
+                    fill={true}
+                  />
+                </span>
+              ) : (
+                uploadButton
+              )}
+            </Upload>
+          </Flex>
+        </FormItem>
+
+        <FormItem
+          name="username"
+          label="Username"
+          validateTrigger={['onChange', 'onBlur']}
+          normalize={(value) => value.trim()}
+          rules={[{ required: true, message: '${label} is required' }]}
+        >
+          <Input maxLength={200} placeholder="Username" />
+        </FormItem>
+
+        <FormItem
+          name="email"
+          label="Email"
+          validateTrigger={['onChange', 'onBlur']}
+          normalize={(value) => value.trim()}
+          rules={[
+            { required: true, message: '${label} is required' },
+            {
+              type: 'email',
+              message: 'Invalid email format. Please enter a valid email (e.g., user@domain.com).',
+            },
+          ]}
+        >
+          <Input maxLength={200} placeholder="Email" />
+        </FormItem>
+
+        <FormItem
+          name="roleId"
+          label="Role"
+          validateTrigger={['onChange', 'onBlur']}
+          normalize={(value) => value.trim()}
+          rules={[{ required: true, message: '${label} is required' }]}
+        >
+          <Select placeholder="Select a role" options={roles} />
+        </FormItem>
+
+        {!onlyView && (
+          <PrimaryButton
+            className="w-full mt-4"
+            htmlType="submit"
+            loading={loading}
+            disabled={!isChanged}
           >
-            {imageUrl ? (
-              <span className="w-[100px] h-[100px] relative">
-                <Image
-                  src={imageUrl}
-                  alt="avatar"
-                  className="rounded-[999px] h-full w-full absolute"
-                  fill={true}
-                />
-              </span>
-            ) : (
-              uploadButton
-            )}
-          </Upload>
-        </Flex>
-      </FormItem>
-
-      <FormItem
-        name="username"
-        label="Username"
-        validateTrigger={['onChange', 'onBlur']}
-        normalize={(value) => value.trim()}
-        rules={[{ required: true, message: '${label} is required' }]}
-      >
-        <Input maxLength={200} placeholder="Username" />
-      </FormItem>
-
-      <FormItem
-        name="email"
-        label="Email"
-        validateTrigger={['onChange', 'onBlur']}
-        normalize={(value) => value.trim()}
-        rules={[
-          { required: true, message: '${label} is required' },
-          {
-            type: 'email',
-            message: 'Invalid email format. Please enter a valid email (e.g., user@domain.com).',
-          },
-        ]}
-      >
-        <Input maxLength={200} placeholder="Email" />
-      </FormItem>
-
-      <FormItem
-        name="roleId"
-        label="Role"
-        validateTrigger={['onChange', 'onBlur']}
-        normalize={(value) => value.trim()}
-        rules={[{ required: true, message: '${label} is required' }]}
-      >
-        <Select placeholder="Select a role" options={roles} />
-      </FormItem>
-
-      <PrimaryButton className="w-full mt-4" htmlType="submit" loading={loading}>
-        Create user
-      </PrimaryButton>
-    </CustomForm>
+            {user ? 'Update user' : 'Create user'}
+          </PrimaryButton>
+        )}
+      </CustomForm>
+    </div>
   );
 };
 
