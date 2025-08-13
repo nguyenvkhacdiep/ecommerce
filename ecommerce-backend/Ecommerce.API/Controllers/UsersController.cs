@@ -7,6 +7,7 @@ namespace Ecommerce.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;
@@ -35,9 +36,9 @@ public class UsersController : ControllerBase
         return CreatedAtAction(nameof(GetUsers), new { id = createdUser.Id }, createdUser);
     }
 
-    [Authorize(Roles = "Super Admin")]
-    [HttpPut("edit-user")]
-    public async Task<IActionResult> EditUser(Guid id, AddUserDto userUpdateDto)
+    [HttpPut("edit-user/{id:guid}")]
+    [Authorize(Policy = "SuperAdminOrSelf")]
+    public async Task<IActionResult> EditUser(Guid id, [FromBody] AddUserDto userUpdateDto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -46,12 +47,22 @@ public class UsersController : ControllerBase
     }
 
     [Authorize(Roles = "Super Admin")]
-    [HttpPatch("inactive-user")]
-    public async Task<IActionResult> EditUser(Guid id)
+    [HttpPatch("inactive-user/{id:guid}")]
+    public async Task<IActionResult> InactiveUser(Guid id)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         var message = await _userService.InactiveUserAsync(id);
         return Ok(new { message });
+    }
+
+    [HttpGet("get-user/{id:guid}")]
+    [Authorize(Policy = "SuperAdminOrSelf")]
+    public async Task<IActionResult> GetUser(Guid id)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var user = await _userService.GetUserById(id);
+        return Ok(user);
     }
 }

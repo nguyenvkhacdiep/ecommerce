@@ -9,4 +9,5 @@ public interface IUserService
     Task<UserResponseModel> AddUserAsync(AddUserDto addUserDto);
     Task<string> EditUserAsync(Guid id, AddUserDto addUserDto);
     Task<string> InactiveUserAsync(Guid id);
+    Task<UserResponseModel> GetUserById(Guid id);
 }

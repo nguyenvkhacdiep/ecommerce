@@ -28,7 +28,7 @@ public class AddUserDto
 {
     public string Username { get; set; } = null!;
     public string Email { get; set; } = null!;
-    public string UrlAvatar { get; set; } = null!;
+    public string? UrlAvatar { get; set; } = null!;
     public Guid RoleId { get; set; }
 }
 
