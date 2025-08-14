@@ -32,7 +32,6 @@ export interface IForgotPasswordPayload {
 }
 
 export interface IResetPasswordPayload {
-  email: string;
   token: string;
   password: string;
   confirmPassword: string;
@@ -41,6 +40,15 @@ export interface IResetPasswordPayload {
 export interface IRoleResponse {
   id: string;
   name: string;
+}
+
+export interface ICheckToken {
+  type: string;
+  token: string;
+}
+
+export interface IActiveUserResponse {
+  setPasswordToken: string;
 }
 
 export async function login(payload: ILoginPayload): Promise<IUserLoginResponse> {
@@ -53,8 +61,10 @@ export async function forgotPassword(payload: IForgotPasswordPayload): Promise<I
   return response.data;
 }
 
-export async function checkResetPasswordToken(token: string): Promise<boolean> {
-  const response = await axiosInstance.get(`/Auth/check-token?token=${token}`);
+export async function checkToken(data: ICheckToken): Promise<boolean> {
+  const response = await axiosInstance.get(
+    `/Auth/check-token?token=${data.token}&type=${data.type}`,
+  );
   return response.data;
 }
 
@@ -65,5 +75,15 @@ export async function resetPassword(payload: IResetPasswordPayload): Promise<IMe
 
 export async function getAllRoles(): Promise<IRoleResponse[]> {
   const response = await axiosInstance.get('/Auth/get-all-roles');
+  return response.data;
+}
+
+export async function setPassword(payload: IResetPasswordPayload): Promise<IMessageResponse> {
+  const response = await axiosInstance.post('/Auth/set-password', payload);
+  return response.data;
+}
+
+export async function activeUser(token: string): Promise<IActiveUserResponse> {
+  const response = await axiosInstance.get(`/Auth/activate?token=${token}`);
   return response.data;
 }

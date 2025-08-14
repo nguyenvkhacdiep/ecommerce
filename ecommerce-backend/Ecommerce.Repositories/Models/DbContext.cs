@@ -2,10 +2,13 @@
 
 namespace Ecommerce.Repositories.Models;
 
-public class AppDbContext : DbContext 
+public class AppDbContext : DbContext
 {
-    public AppDbContext(DbContextOptions options): base(options){}
-    
+    public AppDbContext(DbContextOptions options) : base(options)
+    {
+    }
+
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
+    public DbSet<TokenUser> TokenUsers { get; set; }
 }

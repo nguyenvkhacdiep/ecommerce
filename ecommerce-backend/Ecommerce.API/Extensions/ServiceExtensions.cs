@@ -74,5 +74,6 @@ public static class ServiceExtensions
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IAuthRepository, AuthRepository>();
+        services.AddScoped<ITokenUserRepository, TokenUserRepository>();
     }
 }

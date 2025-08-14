@@ -11,4 +11,5 @@ public interface IAuthService
     Task<bool> ValidateToken(string token, string type);
     Task<string> ResetPassword(ResetPasswordEmailDto resetPasswordEmailDto);
     Task<List<RoleModel>> GetAllRoles();
+    Task<string> SetPasswordAsync(SetPasswordEmailDto setPasswordEmailDto);
 }

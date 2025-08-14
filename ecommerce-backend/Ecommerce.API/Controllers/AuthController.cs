@@ -50,9 +50,9 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet("check-token")]
-    public async Task<IActionResult> CheckResetPasswordToken([FromQuery] string token)
+    public async Task<IActionResult> CheckResetPasswordToken([FromQuery] string token, [FromQuery] string type)
     {
-        var isValid = await _authService.ValidateToken(token, "reset-password");
+        var isValid = await _authService.ValidateToken(token, type);
         return Ok(isValid);
     }
 
@@ -68,5 +68,12 @@ public class AuthController : ControllerBase
     {
         var roles = await _authService.GetAllRoles();
         return Ok(roles);
+    }
+
+    [HttpPost("set-password")]
+    public async Task<IActionResult> SetPassword([FromBody] SetPasswordEmailDto setPasswordEmailDto)
+    {
+        var message = await _authService.SetPasswordAsync(setPasswordEmailDto);
+        return Ok(new { message });
     }
 }

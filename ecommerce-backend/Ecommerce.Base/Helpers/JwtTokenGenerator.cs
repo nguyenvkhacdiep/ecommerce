@@ -50,7 +50,7 @@ public class JwtTokenGenerator
         return (tokenString, expiresIn);
     }
 
-    public string GenerateTokenByType(Guid userId, string type)
+    public (string Token, DateTime expiresAt) GenerateTokenByType(Guid userId, string type)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.SecretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -65,11 +65,14 @@ public class JwtTokenGenerator
             _settings.Issuer,
             _settings.Audience,
             claims,
-            expires: DateTime.UtcNow.AddHours(24),
+            expires: type == "active-account" ? null : DateTime.UtcNow.AddHours(24),
             signingCredentials: creds
         );
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+        var expiresAt = DateTime.UtcNow.AddHours(24);
+
+        return (tokenString, expiresAt);
     }
 
     public bool ValidateToken(string token, string type)

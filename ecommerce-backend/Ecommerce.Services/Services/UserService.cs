@@ -19,12 +19,14 @@ public class UserService : IUserService
     private readonly JwtTokenGenerator _jwtTokenGenerator;
     private readonly IMapper _mapper;
     private readonly IRoleRepository _roleRepository;
+    private readonly ITokenUserRepository _tokenUserRepository;
     private readonly IUserRepository _userRepository;
 
     public UserService(IUserRepository userRepository, IRoleRepository roleRepository, IMapper mapper,
         IEmailService emailService,
         JwtTokenGenerator jwtTokenGenerator,
-        IOptions<FrontendSettings> frontendOptions)
+        IOptions<FrontendSettings> frontendOptions,
+        ITokenUserRepository tokenUserRepository)
     {
         _userRepository = userRepository;
         _mapper = mapper;
@@ -32,6 +34,7 @@ public class UserService : IUserService
         _jwtTokenGenerator = jwtTokenGenerator;
         _emailService = emailService;
         _frontendUrl = frontendOptions.Value.BaseUrl;
+        _tokenUserRepository = tokenUserRepository;
     }
 
     public async Task<UserResponseModel> AddUserAsync(AddUserDto addUserDto)
@@ -54,7 +57,7 @@ public class UserService : IUserService
         }
 
         var userId = Guid.NewGuid();
-        var activationToken = _jwtTokenGenerator.GenerateTokenByType(userId, "validate-account");
+        var (token, expiresAt) = _jwtTokenGenerator.GenerateTokenByType(userId, "active-account");
 
         var user = new User
         {
@@ -62,19 +65,26 @@ public class UserService : IUserService
             Username = addUserDto.Username,
             Email = addUserDto.Email,
             IsActive = false,
-            ActivationToken = activationToken,
             UrlAvatar = addUserDto.UrlAvatar,
             CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
             RoleId = addUserDto.RoleId
         };
 
-        var activationLink = $"{_frontendUrl}/activate?email={user.Email}&token={user.ActivationToken}";
+        var activationLink = $"{_frontendUrl}/activate?email={user.Email}&token={token}";
 
         await _emailService.SendAccountActivationEmailAsync(user.Email, user.Username, activationLink);
 
+        _tokenUserRepository.Add(new TokenUser
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            Token = token,
+            Type = "active-account",
+            IsUsed = false
+        });
         _userRepository.Add(user);
         await _userRepository.SaveChangesAsync();
+        await _tokenUserRepository.SaveChangesAsync();
 
         var roleEntity = await _roleRepository
             .FindByCondition(role => role.Id == user.RoleId)
@@ -90,7 +100,6 @@ public class UserService : IUserService
             IsActive = user.IsActive,
             UrlAvatar = user.UrlAvatar,
             CreatedAt = user.CreatedAt,
-            UpdatedAt = user.UpdatedAt,
             Role = roleMapper
         };
 

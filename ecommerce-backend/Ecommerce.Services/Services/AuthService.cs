@@ -21,12 +21,13 @@ public class AuthService : IAuthService
     private readonly IMapper _mapper;
     private readonly IPasswordHasher<User> _passwordHasher;
     private readonly IRoleRepository _roleRepository;
-
+    private readonly ITokenUserRepository _tokenUserRepository;
 
     public AuthService(IAuthRepository authRepository, IMapper mapper,
         IEmailService emailService,
         JwtTokenGenerator jwtTokenGenerator, IPasswordHasher<User> passwordHasher,
-        IOptions<FrontendSettings> frontendOptions, IRoleRepository roleRepository)
+        IOptions<FrontendSettings> frontendOptions, IRoleRepository roleRepository,
+        ITokenUserRepository tokenUserRepository)
     {
         _authRepository = authRepository;
         _mapper = mapper;
@@ -35,6 +36,7 @@ public class AuthService : IAuthService
         _passwordHasher = passwordHasher;
         _frontendUrl = frontendOptions.Value.BaseUrl;
         _roleRepository = roleRepository;
+        _tokenUserRepository = tokenUserRepository;
     }
 
     public async Task<UserLoginResponseModel> Login(UserLoginDto userLoginDto)
@@ -90,6 +92,7 @@ public class AuthService : IAuthService
             .FindByCondition(u => u.Email == email)
             .FirstOrDefaultAsync();
 
+
         if (findUser == null)
         {
             var errors = new List<FieldError>
@@ -103,15 +106,39 @@ public class AuthService : IAuthService
             throw new BadRequestException("INVALID_FIELD", errors);
         }
 
-        var activationToken = _jwtTokenGenerator.GenerateTokenByType(findUser.Id, "validate-account");
-        var activationLink = $"{_frontendUrl}/activate?email={findUser.Email}&token={activationToken}";
+        var existingToken = await _tokenUserRepository
+            .FindByCondition(t => t.UserId == findUser.Id && t.Type == "active-account" && !t.IsUsed)
+            .FirstOrDefaultAsync();
 
-        findUser.ActivationToken = activationToken;
+        var (token, expiresAt) = _jwtTokenGenerator.GenerateTokenByType(findUser.Id, "active-account");
+        var activationLink = $"{_frontendUrl}/activate?email={findUser.Email}&token={token}";
+
         findUser.UpdatedAt = DateTime.UtcNow;
+
+        if (existingToken != null)
+        {
+            existingToken.Token = token;
+            existingToken.ExpiredAt = expiresAt;
+            existingToken.IsUsed = false;
+            _tokenUserRepository.Update(existingToken);
+        }
+        else
+        {
+            _tokenUserRepository.Add(new TokenUser
+            {
+                Id = Guid.NewGuid(),
+                UserId = findUser.Id,
+                Token = token,
+                Type = "active-account",
+                IsUsed = false,
+                ExpiredAt = expiresAt,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
 
         _authRepository.Update(findUser);
         await _authRepository.SaveChangesAsync();
-
+        await _tokenUserRepository.SaveChangesAsync();
         await _emailService.SendAccountActivationEmailAsync(findUser.Email, findUser.Username, activationLink);
 
         return "Activation email has been sent. Please check your inbox.";
@@ -119,23 +146,37 @@ public class AuthService : IAuthService
 
     public async Task<object> ActivateUserAsync(string token)
     {
-        var user = await _authRepository
-            .FindByCondition(u => u.ActivationToken == token)
+        var tokenRecord = await _tokenUserRepository
+            .FindByCondition(t => t.Token == token && t.Type == "active-account")
+            .Include(t => t.User)
             .FirstOrDefaultAsync();
 
-        if (user == null) throw new BadRequestException("Invalid or expired activation link");
+        if (tokenRecord == null || tokenRecord.IsUsed)
+            throw new BadRequestException("Invalid or expired activation link");
+
+        var user = tokenRecord.User;
 
         if (user.IsActive) throw new BadRequestException("Your account is already activated.");
 
-        user.IsActive = true;
-        user.ActivationToken = null;
-        user.UpdatedAt = DateTime.UtcNow;
+        tokenRecord.IsUsed = true;
+        tokenRecord.UsedAt = DateTime.UtcNow;
+        _tokenUserRepository.Update(tokenRecord);
 
-        _authRepository.Update(user);
-        await _authRepository.SaveChangesAsync();
+        var (setPasswordToken, expiresAt) = _jwtTokenGenerator.GenerateTokenByType(user.Id, "set-password");
+        _tokenUserRepository.Add(new TokenUser
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            Token = setPasswordToken,
+            Type = "set-password",
+            IsUsed = false,
+            ExpiredAt = expiresAt,
+            CreatedAt = DateTime.UtcNow
+        });
 
-        var resetPasswordToken = _jwtTokenGenerator.GenerateTokenByType(user.Id, "reset-password");
-        return new { resetPasswordToken };
+        await _tokenUserRepository.SaveChangesAsync();
+
+        return new { setPasswordToken };
     }
 
     public async Task<string> ForgotPassword(string email)
@@ -162,10 +203,23 @@ public class AuthService : IAuthService
             throw new BadRequestException(
                 "Your account is not activated. Please check your email or request a new activation link.");
 
-        var token = _jwtTokenGenerator.GenerateTokenByType(user.Id, "reset-password");
+        var (resetPasswordToken, expiresAt) = _jwtTokenGenerator.GenerateTokenByType(user.Id, "reset-password");
 
-        var resetLink = $"{_frontendUrl}/reset-password?email={user.Email}&token={token}";
+        _tokenUserRepository.Add(new TokenUser
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            Token = resetPasswordToken,
+            Type = "reset-password",
+            IsUsed = false,
+            ExpiredAt = expiresAt,
+            CreatedAt = DateTime.UtcNow
+        });
 
+
+        var resetLink = $"{_frontendUrl}/reset-password?email={user.Email}&token={resetPasswordToken}";
+
+        await _tokenUserRepository.SaveChangesAsync();
         await _emailService.SendForgotPasswordEmailAsync(email, user.Username, resetLink);
 
         return "The password reset link has been sent to your email. Please check your inbox.";
@@ -173,19 +227,29 @@ public class AuthService : IAuthService
 
     public async Task<bool> ValidateToken(string token, string type)
     {
-        return _jwtTokenGenerator.ValidateToken(token, type);
+        var tokenRecord = await _tokenUserRepository
+            .FindByCondition(t => t.Token == token && t.Type == type)
+            .FirstOrDefaultAsync();
+
+        return tokenRecord is not null
+               && !tokenRecord.IsUsed
+               && (tokenRecord.ExpiredAt == null || tokenRecord.ExpiredAt >= DateTime.UtcNow);
     }
 
     public async Task<string> ResetPassword(ResetPasswordEmailDto resetPasswordEmailDto)
     {
-        var checkToken = _jwtTokenGenerator.ValidateToken(resetPasswordEmailDto.Token, "reset-password");
-        if (!checkToken) throw new BadRequestException("Invalid or expired activation link.");
-
-        var user = await _authRepository
-            .FindByCondition(u => u.Email == resetPasswordEmailDto.Email)
+        var tokenRecord = await _tokenUserRepository
+            .FindByCondition(t => t.Token == resetPasswordEmailDto.Token && t.Type == "reset-password")
             .FirstOrDefaultAsync();
 
-        if (user == null) throw new BadRequestException("Email is incorrect or account does not exist.");
+        if (tokenRecord == null || tokenRecord.IsUsed || tokenRecord.ExpiredAt < DateTime.UtcNow)
+            throw new BadRequestException("Invalid or expired activation link");
+
+        var user = await _authRepository
+            .FindByCondition(u => u.Id == tokenRecord.UserId)
+            .FirstOrDefaultAsync();
+
+        if (user == null) throw new BadRequestException("Account does not exist.");
 
         // if (_passwordHasher.VerifyHashedPassword(user, user.Password, resetPasswordEmailDto.Password) ==
         //     PasswordVerificationResult.Success)
@@ -207,12 +271,16 @@ public class AuthService : IAuthService
             throw new BadRequestException("INVALID_FIELD", errors);
         }
 
-
         user.Password = _passwordHasher.HashPassword(user, resetPasswordEmailDto.Password);
         user.UpdatedAt = DateTime.UtcNow;
-
         _authRepository.Update(user);
+
+        tokenRecord.IsUsed = true;
+        tokenRecord.UsedAt = DateTime.UtcNow;
+        _tokenUserRepository.Update(tokenRecord);
+
         await _authRepository.SaveChangesAsync();
+        await _tokenUserRepository.SaveChangesAsync();
 
         return "Password has been reset successfully.";
     }
@@ -222,5 +290,49 @@ public class AuthService : IAuthService
         var roles = _roleRepository.FindAll().Where(r => r.Name != "Super Admin");
         var rolesResponse = _mapper.Map<List<RoleModel>>(roles);
         return rolesResponse;
+    }
+
+    public async Task<string> SetPasswordAsync(SetPasswordEmailDto payload)
+    {
+        var tokenEntity = await _tokenUserRepository
+            .FindByCondition(t =>
+                t.Token == payload.Token && t.Type == "set-password" && !t.IsUsed && t.ExpiredAt > DateTime.UtcNow)
+            .Include(t => t.User)
+            .FirstOrDefaultAsync();
+
+        if (tokenEntity == null)
+            throw new BadRequestException("Invalid or expired token");
+
+        var user = tokenEntity.User;
+
+        if (user.IsActive)
+            throw new BadRequestException("Account is already activated. Please use reset password instead.");
+
+        if (payload.Password != payload.ConfirmPassword)
+        {
+            var errors = new List<FieldError>
+            {
+                new()
+                {
+                    Field = "confirmPassword",
+                    Issue = "Password and Confirm password do not match."
+                }
+            };
+            throw new BadRequestException("INVALID_FIELD", errors);
+        }
+
+        user.Password = _passwordHasher.HashPassword(user, payload.Password);
+        user.IsActive = true;
+        user.UpdatedAt = DateTime.UtcNow;
+
+        _authRepository.Update(user);
+
+        tokenEntity.IsUsed = true;
+        _tokenUserRepository.Update(tokenEntity);
+
+        await _authRepository.SaveChangesAsync();
+        await _tokenUserRepository.SaveChangesAsync();
+
+        return "Password set successfully. Your account is now active.";
     }
 }
