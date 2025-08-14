@@ -52,7 +52,13 @@ public class ForgotPasswordEmailDto
 
 public class ResetPasswordEmailDto
 {
-    public string Email { get; set; } = null!;
+    public string Token { get; set; } = null!;
+    public string Password { get; set; } = null!;
+    public string ConfirmPassword { get; set; } = null!;
+}
+
+public class SetPasswordEmailDto
+{
     public string Token { get; set; } = null!;
     public string Password { get; set; } = null!;
     public string ConfirmPassword { get; set; } = null!;

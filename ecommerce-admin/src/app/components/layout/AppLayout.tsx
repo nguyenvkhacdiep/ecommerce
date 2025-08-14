@@ -27,8 +27,10 @@ const AppLayoutComponent = ({
   if (
     pathName === '/login' ||
     pathName === '/reset-password' ||
+    pathName === '/set-password' ||
     pathName === '/forgot-password' ||
-    pathName === '/token-expired'
+    pathName === '/token-expired' ||
+    pathName === '/activate'
   )
     return (
       <Suspense>
