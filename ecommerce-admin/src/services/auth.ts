@@ -87,3 +87,8 @@ export async function activeUser(token: string): Promise<IActiveUserResponse> {
   const response = await axiosInstance.get(`/Auth/activate?token=${token}`);
   return response.data;
 }
+
+export async function resendEmailActiveUser(email: string): Promise<IMessageResponse> {
+  const response = await axiosInstance.post('/Auth/resend-activation', { email });
+  return response.data;
+}

@@ -10,15 +10,22 @@ import { useSetRecoilState } from 'recoil';
 import { selectedUserDetailAtom } from '@/recoil/atoms/userDetailAtom';
 import useTokenCookies from '@/hooks/useTokenCookies';
 import { useCallbackUrl } from '@/hooks/reactQuery/useCallbackUrl';
-import { showErrorMessage } from '@/utils/alert';
+import useModalHandler from '@/hooks/useModalHandler';
+import ConfirmModal from '@/app/components/modal/ConfirmModal';
+import { useResendEmailActiveUser } from '@/hooks/reactQuery/auth/useResendEmailActiveUser';
+import { showErrorMessage, showSuccessMessage } from '@/utils/alert';
 
 const Login: React.FC = () => {
   const [form] = Form.useForm();
   const { mutateAsync, isPending } = useLogin();
+  const { mutateAsync: resendEmailActiveUserMutate, isPending: resendEmailActiveUserPending } =
+    useResendEmailActiveUser();
   const setUserDetail = useSetRecoilState(selectedUserDetailAtom);
   const { setAuthToken } = useTokenCookies();
   const { redirectToCallback } = useCallbackUrl();
+  const { open, toggleModal } = useModalHandler();
   const [error, setError] = useState<Error | null>(null);
+  const [messageError, setMessageError] = useState<string>('');
 
   const handleLogin = async (data: ILoginPayload) => {
     try {
@@ -30,10 +37,21 @@ const Login: React.FC = () => {
       }
     } catch (error: any) {
       if (!(error as any).data.errors) {
-        showErrorMessage('Account', (error as any).data.message);
+        setMessageError((error as any).data.message);
+        toggleModal();
       } else {
         setError(error);
       }
+    }
+  };
+
+  const handleSendEmailActiveUser = async () => {
+    try {
+      const result = await resendEmailActiveUserMutate(form.getFieldValue('email'));
+      showSuccessMessage('Account', result.message);
+      toggleModal();
+    } catch (error) {
+      showErrorMessage('Account', (error as any).data.message);
     }
   };
 
@@ -43,6 +61,22 @@ const Login: React.FC = () => {
         <LoginTitle />
         <LoginForm form={form} error={error} loading={isPending} onSubmit={handleLogin} />
       </div>
+
+      {open && (
+        <ConfirmModal
+          open={open}
+          onCancel={toggleModal}
+          onOk={handleSendEmailActiveUser}
+          cancelText="Cancel"
+          okText="Resend"
+          okButtonLoading={resendEmailActiveUserPending}
+          width={400}
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <span>{messageError}</span>
+          </div>
+        </ConfirmModal>
+      )}
     </div>
   );
 };

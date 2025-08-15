@@ -86,64 +86,6 @@ public class AuthService : IAuthService
         };
     }
 
-    public async Task<string> ResendActivationEmailAsync(string email)
-    {
-        var findUser = await _authRepository
-            .FindByCondition(u => u.Email == email)
-            .FirstOrDefaultAsync();
-
-
-        if (findUser == null)
-        {
-            var errors = new List<FieldError>
-            {
-                new()
-                {
-                    Field = "email",
-                    Issue = "Email is incorrect or account does not exist."
-                }
-            };
-            throw new BadRequestException("INVALID_FIELD", errors);
-        }
-
-        var existingToken = await _tokenUserRepository
-            .FindByCondition(t => t.UserId == findUser.Id && t.Type == "active-account" && !t.IsUsed)
-            .FirstOrDefaultAsync();
-
-        var (token, expiresAt) = _jwtTokenGenerator.GenerateTokenByType(findUser.Id, "active-account");
-        var activationLink = $"{_frontendUrl}/activate?email={findUser.Email}&token={token}";
-
-        findUser.UpdatedAt = DateTime.UtcNow;
-
-        if (existingToken != null)
-        {
-            existingToken.Token = token;
-            existingToken.ExpiredAt = expiresAt;
-            existingToken.IsUsed = false;
-            _tokenUserRepository.Update(existingToken);
-        }
-        else
-        {
-            _tokenUserRepository.Add(new TokenUser
-            {
-                Id = Guid.NewGuid(),
-                UserId = findUser.Id,
-                Token = token,
-                Type = "active-account",
-                IsUsed = false,
-                ExpiredAt = expiresAt,
-                CreatedAt = DateTime.UtcNow
-            });
-        }
-
-        _authRepository.Update(findUser);
-        await _authRepository.SaveChangesAsync();
-        await _tokenUserRepository.SaveChangesAsync();
-        await _emailService.SendAccountActivationEmailAsync(findUser.Email, findUser.Username, activationLink);
-
-        return "Activation email has been sent. Please check your inbox.";
-    }
-
     public async Task<object> ActivateUserAsync(string token)
     {
         var tokenRecord = await _tokenUserRepository
@@ -334,5 +276,63 @@ public class AuthService : IAuthService
         await _tokenUserRepository.SaveChangesAsync();
 
         return "Password set successfully. Your account is now active.";
+    }
+
+    public async Task<string> ResendActivationEmailAsync(ResendEmailActiveUserDto payload)
+    {
+        var findUser = await _authRepository
+            .FindByCondition(u => u.Email == payload.Email)
+            .FirstOrDefaultAsync();
+
+
+        if (findUser == null)
+        {
+            var errors = new List<FieldError>
+            {
+                new()
+                {
+                    Field = "email",
+                    Issue = "Email is incorrect or account does not exist."
+                }
+            };
+            throw new BadRequestException("INVALID_FIELD", errors);
+        }
+
+        var existingToken = await _tokenUserRepository
+            .FindByCondition(t => t.UserId == findUser.Id && t.Type == "active-account" && !t.IsUsed)
+            .FirstOrDefaultAsync();
+
+        var (token, expiresAt) = _jwtTokenGenerator.GenerateTokenByType(findUser.Id, "active-account");
+        var activationLink = $"{_frontendUrl}/activate?email={findUser.Email}&token={token}";
+
+        findUser.UpdatedAt = DateTime.UtcNow;
+
+        if (existingToken != null)
+        {
+            existingToken.Token = token;
+            existingToken.ExpiredAt = expiresAt;
+            existingToken.IsUsed = false;
+            _tokenUserRepository.Update(existingToken);
+        }
+        else
+        {
+            _tokenUserRepository.Add(new TokenUser
+            {
+                Id = Guid.NewGuid(),
+                UserId = findUser.Id,
+                Token = token,
+                Type = "active-account",
+                IsUsed = false,
+                ExpiredAt = expiresAt,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        _authRepository.Update(findUser);
+        await _authRepository.SaveChangesAsync();
+        await _tokenUserRepository.SaveChangesAsync();
+        await _emailService.SendAccountActivationEmailAsync(findUser.Email, findUser.Username, activationLink);
+
+        return "Activation email has been sent. Please check your inbox.";
     }
 }

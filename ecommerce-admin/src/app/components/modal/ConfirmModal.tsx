@@ -7,6 +7,7 @@ export type Props = ModalProps & {
   danger?: boolean;
   cancelWidth?: number;
   okWidth?: number;
+  okButtonLoading?: boolean;
 };
 
 const ConfirmModal: React.FC<Props> = ({
@@ -20,6 +21,7 @@ const ConfirmModal: React.FC<Props> = ({
   children,
   cancelWidth,
   okWidth,
+  okButtonLoading,
   ...props
 }) => {
   return (
@@ -68,6 +70,7 @@ const ConfirmModal: React.FC<Props> = ({
                 className={okWidth ? `w-[${okWidth}px]` : ''}
                 onClick={onOk}
                 style={{ width: okWidth }}
+                loading={okButtonLoading}
                 {...okButtonProps}
               >
                 {okText}

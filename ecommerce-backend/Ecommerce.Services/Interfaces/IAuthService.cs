@@ -5,7 +5,7 @@ namespace Ecommerce.Services.Interfaces;
 public interface IAuthService
 {
     Task<UserLoginResponseModel> Login(UserLoginDto userLoginDto);
-    Task<string> ResendActivationEmailAsync(string email);
+    Task<string> ResendActivationEmailAsync(ResendEmailActiveUserDto payload);
     Task<object> ActivateUserAsync(string token);
     Task<string> ForgotPassword(string email);
     Task<bool> ValidateToken(string token, string type);
