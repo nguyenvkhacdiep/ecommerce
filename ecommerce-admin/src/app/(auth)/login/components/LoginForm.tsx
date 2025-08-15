@@ -65,7 +65,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ form, error, loading, onSubmit })
         normalize={(value) => value.trim()}
         rules={[{ required: true, message: '${label} is required' }]}
       >
-        <Input maxLength={200} placeholder="Password" />
+        <Input.Password maxLength={200} placeholder="Password" autoComplete="false" />
       </FormItem>
       <div className="w-full flex justify-end">
         <LinkButton onClick={handleNavigateForgotPassword}>Forgot password?</LinkButton>

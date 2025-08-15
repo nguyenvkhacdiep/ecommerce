@@ -25,14 +25,14 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("resend-activation")]
-    public async Task<IActionResult> ResendActivationEmail([FromQuery] string email)
+    [HttpPost("resend-activation")]
+    public async Task<IActionResult> ResendActivationEmail([FromBody] ResendEmailActiveUserDto payload)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var result = await _authService.ResendActivationEmailAsync(email);
+        var message = await _authService.ResendActivationEmailAsync(payload);
 
-        return Ok(new { result });
+        return Ok(new { message });
     }
 
     [HttpGet("activate")]
