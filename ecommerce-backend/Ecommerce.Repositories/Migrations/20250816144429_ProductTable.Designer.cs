@@ -4,6 +4,7 @@ using Ecommerce.Repositories.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecommerce.Repositories.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250816144429_ProductTable")]
+    partial class ProductTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,12 +35,7 @@ namespace Ecommerce.Repositories.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("ShopId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("ShopId");
 
                     b.ToTable("CategoryProducts");
                 });
@@ -422,17 +420,6 @@ namespace Ecommerce.Repositories.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Ecommerce.Repositories.Models.CategoryProduct", b =>
-                {
-                    b.HasOne("Ecommerce.Repositories.Models.Shop", "Shop")
-                        .WithMany("Categories")
-                        .HasForeignKey("ShopId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Shop");
-                });
-
             modelBuilder.Entity("Ecommerce.Repositories.Models.Product", b =>
                 {
                     b.HasOne("Ecommerce.Repositories.Models.CategoryProduct", "CategoryProduct")
@@ -589,8 +576,6 @@ namespace Ecommerce.Repositories.Migrations
 
             modelBuilder.Entity("Ecommerce.Repositories.Models.Shop", b =>
                 {
-                    b.Navigation("Categories");
-
                     b.Navigation("Products");
                 });
 

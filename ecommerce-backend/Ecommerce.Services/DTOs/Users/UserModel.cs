@@ -1,4 +1,6 @@
-﻿namespace Ecommerce.Services.DTOs.Users;
+﻿using Ecommerce.Services.DTOs.Shop;
+
+namespace Ecommerce.Services.DTOs.Users;
 
 public class UserModel
 {
@@ -22,6 +24,7 @@ public class UserResponseModel
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public RoleModel Role { get; set; }
+    public ShopResponseModel? Shop { get; set; }
 }
 
 public class AddUserDto

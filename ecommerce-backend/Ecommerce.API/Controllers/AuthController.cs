@@ -1,5 +1,6 @@
 ﻿using Ecommerce.Services.DTOs.Users;
 using Ecommerce.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce.API.Controllers;
@@ -63,6 +64,7 @@ public class AuthController : ControllerBase
         return Ok(new { message });
     }
 
+    [Authorize(Roles = "Super Admin")]
     [HttpGet("get-all-roles")]
     public async Task<IActionResult> GetAllRole()
     {

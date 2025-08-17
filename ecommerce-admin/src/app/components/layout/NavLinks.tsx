@@ -8,9 +8,9 @@ import { AppstoreOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-desig
 import { useIsSellerAdmin, useIsSuperAdmin } from '@/hooks/useAuthorization';
 import { AppColor } from '@/styles/color';
 
-const SUPER_ADMIN_BLOCKED_MODULE = ['E-Commerce'];
+const SUPER_ADMIN_BLOCKED_MODULE = [''];
 
-const SELLER_ADMIN_BLOCKED_MODULE = ['Account'];
+const ADMIN_BLOCKED_MODULE = [''];
 
 const links = [
   {
@@ -121,7 +121,7 @@ export default function NavLinks() {
       setFilterLinks(filters ?? []);
     }
     if (isSellerAdmin) {
-      const filters = links.filter((item) => !SELLER_ADMIN_BLOCKED_MODULE.includes(item.label));
+      const filters = links.filter((item) => !ADMIN_BLOCKED_MODULE.includes(item.label));
       setFilterLinks(filters ?? []);
     }
 

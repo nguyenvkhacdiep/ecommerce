@@ -148,7 +148,6 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
           name="username"
           label="Username"
           validateTrigger={['onChange', 'onBlur']}
-          normalize={(value) => value.trim()}
           rules={[{ required: true, message: '${label} is required' }]}
         >
           <Input maxLength={200} placeholder="Username" />
