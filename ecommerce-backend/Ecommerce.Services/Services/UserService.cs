@@ -22,7 +22,8 @@ public class UserService : IUserService
     private readonly ITokenUserRepository _tokenUserRepository;
     private readonly IUserRepository _userRepository;
 
-    public UserService(IUserRepository userRepository, IRoleRepository roleRepository, IMapper mapper,
+    public UserService(IUserRepository userRepository, IRoleRepository roleRepository,
+        IMapper mapper,
         IEmailService emailService,
         JwtTokenGenerator jwtTokenGenerator,
         IOptions<FrontendSettings> frontendOptions,
@@ -72,7 +73,8 @@ public class UserService : IUserService
 
         var activationLink = $"{_frontendUrl}/activate?email={user.Email}&token={token}";
 
-        await _emailService.SendAccountActivationEmailAsync(user.Email, user.Username, activationLink);
+        await _emailService.SendAccountActivationEmailAsync(user.Email, user.Username,
+            activationLink);
 
         _tokenUserRepository.Add(new TokenUser
         {
@@ -127,7 +129,8 @@ public class UserService : IUserService
 
         var userResponse = _mapper.Map<List<UserResponseModel>>(users);
 
-        return new PageList<UserResponseModel>(userResponse, query.Count(), userParameters.PageNumber,
+        return new PageList<UserResponseModel>(userResponse, query.Count(),
+            userParameters.PageNumber,
             userParameters.PageSize);
     }
 
@@ -175,5 +178,19 @@ public class UserService : IUserService
 
         var user = _mapper.Map<UserResponseModel>(findUser);
         return user;
+    }
+
+    public async Task<string> DeleteUser(Guid userId)
+    {
+        var findUser = await _userRepository
+            .FindByCondition(s => s.Id == userId)
+            .FirstOrDefaultAsync();
+
+        if (findUser == null) throw new BadRequestException("User not found.");
+
+        _userRepository.Delete(findUser);
+        await _userRepository.SaveChangesAsync();
+
+        return "User has been deleted successfully.";
     }
 }

@@ -5,5 +5,5 @@ export const isSuperAdmin = (userRole: string) => {
 };
 
 export const isSellerAdmin = (userRole: string) => {
-  return userRole === RoleCode.SellerAdmin;
+  return userRole === RoleCode.Admin;
 };

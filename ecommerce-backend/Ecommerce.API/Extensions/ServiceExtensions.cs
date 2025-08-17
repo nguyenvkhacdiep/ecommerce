@@ -14,9 +14,11 @@ namespace Ecommerce.API.Extensions;
 
 public static class ServiceExtensions
 {
-    public static void ServiceConfiguration(this IServiceCollection services, IConfiguration configuration)
+    public static void ServiceConfiguration(this IServiceCollection services,
+        IConfiguration configuration)
     {
-        services.AddAutoMapper(cfg => { cfg.AddCollectionMappers(); }, typeof(MappingProfile));
+        services.AddAutoMapper(cfg => { cfg.AddCollectionMappers(); },
+            typeof(MappingProfile));
 
         services.AddSwaggerGen(c =>
         {
@@ -61,19 +63,26 @@ public static class ServiceExtensions
         });
 
 
-        services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+        services.Configure<JwtSettings>(
+            configuration.GetSection("JwtSettings"));
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IShopService, ShopService>();
+        services.AddScoped<ICategoryProductService, CategoryProductService>();
         services.AddScoped<IFirebaseStorageService, FirebaseStorageService>();
         services.AddScoped<JwtTokenGenerator>();
     }
 
-    public static void RepositoryConfiguration(this IServiceCollection services, IConfiguration configuration)
+    public static void RepositoryConfiguration(this IServiceCollection services,
+        IConfiguration configuration)
     {
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IAuthRepository, AuthRepository>();
         services.AddScoped<ITokenUserRepository, TokenUserRepository>();
+        services.AddScoped<IShopRepository, ShopRepository>();
+        services.AddScoped<IShopFollowerRepository, ShopFollowerRepository>();
+        services.AddScoped<ICategoryProductRepository, CategoryProductRepository>();
     }
 }

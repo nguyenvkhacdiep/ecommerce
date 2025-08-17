@@ -13,4 +13,5 @@ public class User
     public Guid RoleId { get; set; }
     public virtual Role Role { get; set; } = null!;
     public ICollection<TokenUser> TokenUsers { get; set; } = new List<TokenUser>();
+    public virtual Shop? Shop { get; set; }
 }

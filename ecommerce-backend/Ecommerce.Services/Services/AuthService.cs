@@ -43,6 +43,7 @@ public class AuthService : IAuthService
     {
         var user = await _authRepository
             .FindByCondition(u => u.Email == userLoginDto.Email).Include(u => u.Role)
+            .Include(u => u.Shop)
             .FirstOrDefaultAsync();
 
         if (user == null)
@@ -59,7 +60,8 @@ public class AuthService : IAuthService
         }
 
         if (!user.IsActive)
-            throw new BadRequestException("Account is inactive. Please check your email or resend activation link.");
+            throw new BadRequestException(
+                "Account is inactive. Please check your email or resend activation link.");
 
         var passwordVerificationResult =
             _passwordHasher.VerifyHashedPassword(user, user.Password, userLoginDto.Password);
@@ -76,7 +78,8 @@ public class AuthService : IAuthService
             throw new BadRequestException("INVALID_FIELD", errors);
         }
 
-        var (token, expiresIn) = _jwtTokenGenerator.GenerateToken(user.Id, user.Email, user.Role.Name);
+        var (token, expiresIn) =
+            _jwtTokenGenerator.GenerateToken(user.Id, user.Email, user.Role.Name);
 
         return new UserLoginResponseModel
         {
@@ -104,7 +107,8 @@ public class AuthService : IAuthService
         tokenRecord.UsedAt = DateTime.UtcNow;
         _tokenUserRepository.Update(tokenRecord);
 
-        var (setPasswordToken, expiresAt) = _jwtTokenGenerator.GenerateTokenByType(user.Id, "set-password");
+        var (setPasswordToken, expiresAt) =
+            _jwtTokenGenerator.GenerateTokenByType(user.Id, "set-password");
         _tokenUserRepository.Add(new TokenUser
         {
             Id = Guid.NewGuid(),
@@ -145,7 +149,8 @@ public class AuthService : IAuthService
             throw new BadRequestException(
                 "Your account is not activated. Please check your email or request a new activation link.");
 
-        var (resetPasswordToken, expiresAt) = _jwtTokenGenerator.GenerateTokenByType(user.Id, "reset-password");
+        var (resetPasswordToken, expiresAt) =
+            _jwtTokenGenerator.GenerateTokenByType(user.Id, "reset-password");
 
         _tokenUserRepository.Add(new TokenUser
         {
@@ -159,7 +164,8 @@ public class AuthService : IAuthService
         });
 
 
-        var resetLink = $"{_frontendUrl}/reset-password?email={user.Email}&token={resetPasswordToken}";
+        var resetLink =
+            $"{_frontendUrl}/reset-password?email={user.Email}&token={resetPasswordToken}";
 
         await _tokenUserRepository.SaveChangesAsync();
         await _emailService.SendForgotPasswordEmailAsync(email, user.Username, resetLink);
@@ -181,7 +187,8 @@ public class AuthService : IAuthService
     public async Task<string> ResetPassword(ResetPasswordEmailDto resetPasswordEmailDto)
     {
         var tokenRecord = await _tokenUserRepository
-            .FindByCondition(t => t.Token == resetPasswordEmailDto.Token && t.Type == "reset-password")
+            .FindByCondition(t =>
+                t.Token == resetPasswordEmailDto.Token && t.Type == "reset-password")
             .FirstOrDefaultAsync();
 
         if (tokenRecord == null || tokenRecord.IsUsed || tokenRecord.ExpiredAt < DateTime.UtcNow)
@@ -238,7 +245,8 @@ public class AuthService : IAuthService
     {
         var tokenEntity = await _tokenUserRepository
             .FindByCondition(t =>
-                t.Token == payload.Token && t.Type == "set-password" && !t.IsUsed && t.ExpiredAt > DateTime.UtcNow)
+                t.Token == payload.Token && t.Type == "set-password" && !t.IsUsed &&
+                t.ExpiredAt > DateTime.UtcNow)
             .Include(t => t.User)
             .FirstOrDefaultAsync();
 
@@ -248,7 +256,8 @@ public class AuthService : IAuthService
         var user = tokenEntity.User;
 
         if (user.IsActive)
-            throw new BadRequestException("Account is already activated. Please use reset password instead.");
+            throw new BadRequestException(
+                "Account is already activated. Please use reset password instead.");
 
         if (payload.Password != payload.ConfirmPassword)
         {
@@ -286,23 +295,17 @@ public class AuthService : IAuthService
 
 
         if (findUser == null)
-        {
-            var errors = new List<FieldError>
-            {
-                new()
-                {
-                    Field = "email",
-                    Issue = "Email is incorrect or account does not exist."
-                }
-            };
-            throw new BadRequestException("INVALID_FIELD", errors);
-        }
+            throw new BadRequestException("Email is incorrect or account does not exist.");
+
+        if (findUser.IsActive) throw new BadRequestException("Account is already activated.");
 
         var existingToken = await _tokenUserRepository
-            .FindByCondition(t => t.UserId == findUser.Id && t.Type == "active-account" && !t.IsUsed)
+            .FindByCondition(t =>
+                t.UserId == findUser.Id && t.Type == "active-account" && !t.IsUsed)
             .FirstOrDefaultAsync();
 
-        var (token, expiresAt) = _jwtTokenGenerator.GenerateTokenByType(findUser.Id, "active-account");
+        var (token, expiresAt) =
+            _jwtTokenGenerator.GenerateTokenByType(findUser.Id, "active-account");
         var activationLink = $"{_frontendUrl}/activate?email={findUser.Email}&token={token}";
 
         findUser.UpdatedAt = DateTime.UtcNow;
@@ -331,7 +334,8 @@ public class AuthService : IAuthService
         _authRepository.Update(findUser);
         await _authRepository.SaveChangesAsync();
         await _tokenUserRepository.SaveChangesAsync();
-        await _emailService.SendAccountActivationEmailAsync(findUser.Email, findUser.Username, activationLink);
+        await _emailService.SendAccountActivationEmailAsync(findUser.Email, findUser.Username,
+            activationLink);
 
         return "Activation email has been sent. Please check your inbox.";
     }

@@ -18,11 +18,11 @@ public class Product
 
     public DateTime? UpdatedAt { get; set; }
 
-    public Guid CategoryId { get; set; }
+    public Guid? CategoryId { get; set; }
+    public Guid ShopId { get; set; }
 
-    public virtual CategoryProduct CategoryProduct { get; set; } = null!;
+    public virtual CategoryProduct? CategoryProduct { get; set; } = null!;
 
     public virtual ICollection<ProductImages> Images { get; set; } = new List<ProductImages>();
-
     public virtual Shop Shop { get; set; } = null!;
 }

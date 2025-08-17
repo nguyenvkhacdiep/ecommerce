@@ -17,5 +17,10 @@ public class Shop
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 
+    public Guid UserId { get; set; }
+    public virtual User User { get; set; } = null!;
     public virtual ICollection<Product> Products { get; set; } = new List<Product>();
+
+    public virtual ICollection<CategoryProduct> Categories { get; set; } =
+        new List<CategoryProduct>();
 }

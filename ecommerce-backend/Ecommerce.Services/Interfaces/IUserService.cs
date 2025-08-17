@@ -10,4 +10,5 @@ public interface IUserService
     Task<string> EditUserAsync(Guid id, AddUserDto addUserDto);
     Task<string> InactiveUserAsync(Guid id);
     Task<UserResponseModel> GetUserById(Guid id);
+    Task<string> DeleteUser(Guid id);
 }
