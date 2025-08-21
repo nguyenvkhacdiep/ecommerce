@@ -8,6 +8,7 @@ import { useRefetchTableData } from '@/hooks/useFetchingDataHandler';
 import AccountTable from './components/AccountTable';
 import { useInactiveUser } from '@/hooks/reactQuery/user/useInactiveUser';
 import { showErrorMessage, showSuccessMessage } from '@/utils/alert';
+import { useDeleteUser } from '@/hooks/reactQuery/user/useDeleteUser';
 
 const Page = () => {
   const searchParams = useSearchParams();
@@ -20,6 +21,7 @@ const Page = () => {
 
   const { data, isFetching, refetch } = useGetAllUsers(params);
   const { mutateAsync: inactiveUserMutate } = useInactiveUser();
+  const { mutateAsync: deleteUserMutate, isPending: isDeleting } = useDeleteUser();
 
   useRefetchTableData<PagingRequest>({
     params,
@@ -39,18 +41,30 @@ const Page = () => {
     }
   };
 
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      const result = await deleteUserMutate(userId);
+      showSuccessMessage('Delete User', result.message);
+      refetch();
+    } catch (error: any) {
+      if (!(error as any).data.errors) {
+        showErrorMessage('Delete User', (error as any).data.message);
+      }
+    }
+  };
+
   return (
     <div>
-      <div>
-        <AccountTable
-          list={data?.data ?? []}
-          total={data?.totalItems ?? 0}
-          params={params}
-          setParams={setParams}
-          loading={isFetching}
-          onInactiveUser={handleInactiveUser}
-        />
-      </div>
+      <AccountTable
+        list={data?.data ?? []}
+        total={data?.totalItems ?? 0}
+        params={params}
+        setParams={setParams}
+        loading={isFetching}
+        deleting={isDeleting}
+        onInactiveUser={handleInactiveUser}
+        onDeleteUser={handleDeleteUser}
+      />
     </div>
   );
 };

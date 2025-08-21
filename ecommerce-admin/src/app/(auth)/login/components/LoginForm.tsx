@@ -39,7 +39,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ form, error, loading, onSubmit })
       layout="vertical"
       form={form}
       onFinish={onSubmit}
-      style={{ width: 400 }}
+      style={{ width: '90%' }}
       isHideButton
     >
       <FormItem

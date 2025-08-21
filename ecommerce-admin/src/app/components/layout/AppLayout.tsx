@@ -1,12 +1,13 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { Layout, App as AntApp } from 'antd';
+import { Layout, App as AntApp, ConfigProvider } from 'antd';
 import { RecoilRoot } from 'recoil';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Suspense } from 'react';
 import Navbar from './Navbar';
 import { CookiesProvider } from 'react-cookie';
+import { AppColor } from '@/styles/color';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,7 +31,8 @@ const AppLayoutComponent = ({
     pathName === '/set-password' ||
     pathName === '/forgot-password' ||
     pathName === '/token-expired' ||
-    pathName === '/activate'
+    pathName === '/activate' ||
+    pathName === '/forbidden'
   )
     return (
       <Suspense>
@@ -51,7 +53,15 @@ const AppLayout = ({
       <QueryClientProvider client={queryClient}>
         <RecoilRoot>
           <AntApp>
-            <AppLayoutComponent>{children}</AppLayoutComponent>
+            <ConfigProvider
+              theme={{
+                token: {
+                  colorPrimary: AppColor.Purple500,
+                },
+              }}
+            >
+              <AppLayoutComponent>{children}</AppLayoutComponent>
+            </ConfigProvider>
           </AntApp>
         </RecoilRoot>
       </QueryClientProvider>

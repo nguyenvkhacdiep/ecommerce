@@ -1,5 +1,4 @@
 import { LeftOutlined } from '@ant-design/icons';
-import { useRouter } from 'next/navigation';
 import React from 'react';
 
 type Props = {

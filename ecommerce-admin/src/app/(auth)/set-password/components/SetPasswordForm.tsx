@@ -30,7 +30,7 @@ const SetPasswordForm: React.FC<ResetPasswordFormProps> = ({ form, loading, onSu
       layout="vertical"
       form={form}
       onFinish={onSubmit}
-      style={{ width: 400 }}
+      style={{ width: '90%' }}
       isHideButton
     >
       <FormItem

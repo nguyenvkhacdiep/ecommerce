@@ -4,6 +4,10 @@ export const isSuperAdmin = (userRole: string) => {
   return userRole === RoleCode.SuperAdmin;
 };
 
-export const isSellerAdmin = (userRole: string) => {
+export const isAdmin = (userRole: string) => {
   return userRole === RoleCode.Admin;
+};
+
+export const isSeller = (userRole: string) => {
+  return userRole === RoleCode.Seller;
 };

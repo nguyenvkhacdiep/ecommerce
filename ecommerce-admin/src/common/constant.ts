@@ -1,6 +1,7 @@
 export enum RoleCode {
   SuperAdmin = 'Super Admin',
   Admin = 'Admin',
+  Seller = 'Shop',
 }
 
 export const NOT_SAVE_WARNING_MSG = 'The update is not saved yet. Are you sure to leave?';
@@ -11,4 +12,10 @@ export enum TYPE_TOKEN {
   ActiveAccount = 'active-account',
   ResetPassword = 'reset-password',
   SetPassword = 'set-password',
+}
+
+export enum ShopTypeEnum {
+  Normal = 0,
+  Favorite = 1,
+  Mall = 2,
 }

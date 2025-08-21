@@ -36,6 +36,7 @@ public class EditShopDto
     public string? Address { get; set; }
     public string? PhoneNumber { get; set; }
     public string? LogoUrl { get; set; }
+    public ShopTypeEnum Type { get; set; } = 0;
 }
 
 public class EditTypeShopDto

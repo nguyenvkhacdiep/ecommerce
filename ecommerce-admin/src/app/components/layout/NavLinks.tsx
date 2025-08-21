@@ -1,16 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Menu, MenuProps } from 'antd';
+import { Menu } from 'antd';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { AppstoreOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/icons';
-import { useIsSellerAdmin, useIsSuperAdmin } from '@/hooks/useAuthorization';
+import { useIsAdmin, useIsSeller, useIsSuperAdmin } from '@/hooks/useAuthorization';
 import { AppColor } from '@/styles/color';
 
 const SUPER_ADMIN_BLOCKED_MODULE = [''];
 
-const ADMIN_BLOCKED_MODULE = [''];
+const ADMIN_BLOCKED_MODULE = ['Account'];
+const SHOP_BLOCKED_MODULE = ['Account', 'Shop'];
 
 const links = [
   {
@@ -40,8 +41,21 @@ const links = [
     ),
   },
   {
-    key: 'e-commerce',
-    label: 'E-Commerce',
+    key: 'shop',
+    label: 'Shop',
+    icon: <ShoppingCartOutlined />,
+    href: '/shop',
+    activeIcon: (
+      <ShoppingCartOutlined
+        style={{
+          color: AppColor.Purple500,
+        }}
+      />
+    ),
+  },
+  {
+    key: 'products',
+    label: 'Products',
     icon: <ShoppingCartOutlined />,
     activeIcon: (
       <ShoppingCartOutlined
@@ -52,54 +66,14 @@ const links = [
     ),
     children: [
       {
-        key: 'products',
-        label: 'Products',
-        href: '/e-commerce/products',
+        key: 'list-product',
+        label: 'List Product',
+        href: '/products/list-product',
       },
       {
         key: 'add-product',
         label: 'Add Product',
-        href: '/e-commerce/add-product',
-      },
-      {
-        key: 'coupons',
-        label: 'Coupons',
-        href: '/e-commerce/coupons',
-      },
-      {
-        key: 'add-coupon',
-        label: 'Add Coupon',
-        href: '/e-commerce/add-coupon',
-      },
-      {
-        key: 'billing',
-        label: 'Billing',
-        href: '/e-commerce/billing',
-      },
-      {
-        key: 'invoices',
-        label: 'Invoices',
-        href: '/e-commerce/invoices',
-      },
-      {
-        key: 'single-invoice',
-        label: 'Single Invoice',
-        href: '/e-commerce/single-invoice',
-      },
-      {
-        key: 'create-invoice',
-        label: 'Create Invoice',
-        href: '/e-commerce/create-invoice',
-      },
-      {
-        key: 'transactions',
-        label: 'Transactions',
-        href: '/e-commerce/transactions',
-      },
-      {
-        key: 'single-transaction',
-        label: 'Single Transaction',
-        href: '/e-commerce/single-transaction',
+        href: '/products/add-product',
       },
     ],
   },
@@ -111,7 +85,8 @@ export default function NavLinks() {
   const [openKey, setOpenKey] = useState<string[]>([]);
 
   const isSuperAdmin = useIsSuperAdmin();
-  const isSellerAdmin = useIsSellerAdmin();
+  const isSeller = useIsSeller();
+  const isAdmin = useIsAdmin();
 
   const [filterLinks, setFilterLinks] = useState(links ?? ([] as any));
 
@@ -120,8 +95,12 @@ export default function NavLinks() {
       const filters = links.filter((item) => !SUPER_ADMIN_BLOCKED_MODULE.includes(item.label));
       setFilterLinks(filters ?? []);
     }
-    if (isSellerAdmin) {
+    if (isAdmin) {
       const filters = links.filter((item) => !ADMIN_BLOCKED_MODULE.includes(item.label));
+      setFilterLinks(filters ?? []);
+    }
+    if (isSeller) {
+      const filters = links.filter((item) => !SHOP_BLOCKED_MODULE.includes(item.label));
       setFilterLinks(filters ?? []);
     }
 
@@ -129,7 +108,7 @@ export default function NavLinks() {
 
     setCurrent(segments);
     setOpenKey(segments.length === 1 ? [] : segments.slice(0, -1));
-  }, [pathname, isSuperAdmin, isSellerAdmin]);
+  }, [pathname, isSuperAdmin, isSeller, isAdmin]);
 
   return (
     <Menu

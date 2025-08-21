@@ -1,5 +1,6 @@
 import { IMessageResponse } from '@/common/type';
 import axiosInstance from './axiosConfig';
+import { IShopResponse } from './shop';
 
 export interface ILoginPayload {
   email: string;
@@ -20,6 +21,7 @@ export interface IUserResponse {
   createdAt: Date;
   updatedAt: Date;
   role: IRole;
+  shop: IShopResponse;
 }
 export interface IUserLoginResponse {
   user: IUserResponse;
