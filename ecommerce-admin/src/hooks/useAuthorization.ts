@@ -1,5 +1,5 @@
 import { useUserDetailValueClient } from '@/recoil/atoms/userDetailAtom';
-import { isSellerAdmin, isSuperAdmin } from '@/utils/authorization';
+import { isAdmin, isSeller, isSuperAdmin } from '@/utils/authorization';
 import { useMemo } from 'react';
 
 export const useIsSuperAdmin = () => {
@@ -8,8 +8,14 @@ export const useIsSuperAdmin = () => {
   return useMemo(() => isSuperAdmin(userDetail?.role.name as string), [userDetail]);
 };
 
-export const useIsSellerAdmin = () => {
+export const useIsAdmin = () => {
   const userDetail = useUserDetailValueClient();
 
-  return useMemo(() => isSellerAdmin(userDetail?.role.name as string), [userDetail]);
+  return useMemo(() => isAdmin(userDetail?.role.name as string), [userDetail]);
+};
+
+export const useIsSeller = () => {
+  const userDetail = useUserDetailValueClient();
+
+  return useMemo(() => isSeller(userDetail?.role.name as string), [userDetail]);
 };

@@ -39,7 +39,7 @@ const ForgotPasswordForm: React.FC<IForgotPasswordForm> = ({ form, error, loadin
       layout="vertical"
       form={form}
       onFinish={onSubmit}
-      style={{ width: 400 }}
+      style={{ width: '90%' }}
       isHideButton
     >
       <FormItem

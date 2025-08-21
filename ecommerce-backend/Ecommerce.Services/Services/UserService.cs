@@ -112,7 +112,8 @@ public class UserService : IUserService
     {
         var query = _userRepository.FindAll();
 
-        query = query.Include(u => u.Role).Where(u => u.Role.Name != "Super Admin");
+        query = query.Include(u => u.Role).Include(u => u.Shop)
+            .Where(u => u.Role.Name != "Super Admin");
 
         if (!string.IsNullOrWhiteSpace(userParameters.SearchKey))
             query = query.Where(x =>
@@ -172,6 +173,7 @@ public class UserService : IUserService
     public async Task<UserResponseModel> GetUserById(Guid id)
     {
         var findUser = await _userRepository.FindByCondition(u => u.Id == id).Include(u => u.Role)
+            .Include(u => u.Shop)
             .FirstOrDefaultAsync();
 
         if (findUser == null) throw new BadRequestException("User not found.");

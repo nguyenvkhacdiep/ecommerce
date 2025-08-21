@@ -11,9 +11,6 @@ import CommonTag from '@/app/components/tag/CommonTag';
 import TableAction from '@/app/components/table/TableAction';
 import AccountTableHeader from './AccountTableHeader';
 import Link from 'next/link';
-import dayjs from 'dayjs';
-import DeleteUserModal from './DeleteUserModal';
-import { useRouter } from 'next/navigation';
 
 const COLUMNS: TableProps['columns'] = [
   {
@@ -61,7 +58,6 @@ const COLUMNS: TableProps['columns'] = [
     dataIndex: 'createdAt',
     key: 'createdAt',
     sorter: true,
-    render: (value) => dayjs(value).format('DD/MM/YYYY HH:mm'),
   },
 ];
 
@@ -69,43 +65,24 @@ type Props = {
   list: IUserResponse[];
   total: number;
   params: PagingRequest;
-  loading?: boolean;
-  deleting?: boolean;
   setParams: (v: PagingRequest) => void;
   onInactiveUser: (userId: string) => void;
-  onDeleteUser: (userId: string) => Promise<void>;
 } & TableProps;
 
 const AccountTable: React.FC<Props> = ({
   list,
   total,
   params,
-  loading,
-  deleting = false,
   setParams,
   onInactiveUser,
-  onDeleteUser,
   ...props
 }) => {
-  const router = useRouter();
   const { open, toggleModal } = useModalHandler();
   const [selectedRow, setSelectedRow] = useState<IUserResponse>();
 
-  const onDeleteAccount = (record: IUserResponse) => {
-    toggleModal();
-    setSelectedRow(record);
-  };
+  const onDeleteAccount = (record: IUserResponse) => () => {};
 
-  const handleDeleteAccount = async () => {
-    if (selectedRow) {
-      await onDeleteUser(selectedRow.id);
-      toggleModal();
-    }
-  };
-
-  const handleCreateShop = (userId: string) => {
-    router.push(`/shop/add-shop?userId=${userId}`);
-  };
+  const handleConfirmDeleteAccount = () => {};
 
   const actionColumn = useMemo(() => {
     return {
@@ -119,7 +96,6 @@ const AccountTable: React.FC<Props> = ({
                 record={record}
                 onDeleteAccount={onDeleteAccount}
                 onInactiveUser={onInactiveUser}
-                onCreateShop={handleCreateShop}
               />
             }
             trigger="click"
@@ -147,7 +123,6 @@ const AccountTable: React.FC<Props> = ({
         columns={columns}
         dataSource={convertList}
         total={total}
-        loading={loading}
         params={params}
         setParams={setParams}
         scroll={{
@@ -156,14 +131,14 @@ const AccountTable: React.FC<Props> = ({
         title={() => <AccountTableHeader params={params} setParams={setParams} />}
         {...props}
       />
-      {open && (
-        <DeleteUserModal
+      {/* {!!selectedRow && (
+        <DeleteAccountModal
           open={open}
-          onClose={toggleModal}
-          onDeleteUser={handleDeleteAccount}
-          loading={deleting}
+          data={selectedAccountDetail}
+          onCancel={toggleModal}
+          onOk={handleConfirmDeleteAccount}
         />
-      )}
+      )} */}
     </>
   );
 };

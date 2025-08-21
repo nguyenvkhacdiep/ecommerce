@@ -37,3 +37,8 @@ export async function inactiveUser(userId: string): Promise<IMessageResponse> {
   const response = await axiosInstance.patch(`/Users/inactive-user/${userId}`);
   return response.data;
 }
+
+export async function deleteUser(userId: string): Promise<IMessageResponse> {
+  const response = await axiosInstance.delete(`/Users/${userId}`);
+  return response.data;
+}

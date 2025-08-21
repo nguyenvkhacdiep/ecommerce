@@ -39,6 +39,14 @@ axiosInstance.interceptors.response.use(
 
       return Promise.reject(apiError);
     }
+
+    if (error && errorStatusCode === 403) {
+      setTimeout(() => {
+        location.href = '/forbidden';
+      }, 1000);
+
+      return Promise.reject(apiError);
+    }
     return Promise.reject(apiError);
   },
 );

@@ -1,11 +1,10 @@
-import { getUserById } from '@/services/user';
+import { getShop } from '@/services/shop';
 import { useQuery } from '@tanstack/react-query';
 
-export const useGetUser = (id: string, enabled: boolean = true) => {
+export const useGetShop = (shopId: string) => {
   const { data, isLoading, isFetching, isSuccess, isError, error, refetch } = useQuery({
-    queryKey: ['get-user', id],
-    queryFn: () => getUserById(id),
-    enabled,
+    queryKey: ['Shop', shopId],
+    queryFn: () => getShop(shopId),
   });
 
   return {

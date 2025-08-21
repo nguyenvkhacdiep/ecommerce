@@ -120,6 +120,7 @@ public class ShopService : IShopService
         existingShop.Address = payload.Address;
         existingShop.PhoneNumber = payload.PhoneNumber;
         existingShop.LogoUrl = payload.LogoUrl;
+        existingShop.Type = payload.Type;
         existingShop.UpdatedAt = DateTime.UtcNow;
 
         _shopRepository.Update(existingShop);

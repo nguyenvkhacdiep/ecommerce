@@ -4,7 +4,11 @@ import React from 'react';
 import { Button, ButtonProps, ConfigProvider } from 'antd';
 import PencilIcon from '/public/pencil-icon.svg';
 
-const InactiveUserButton: React.FC<ButtonProps> = ({ children, ...props }) => {
+type props = ButtonProps & {
+  icon?: React.ReactNode;
+};
+
+const UserTableActionButton: React.FC<props> = ({ children, icon = <PencilIcon />, ...props }) => {
   return (
     <ConfigProvider
       theme={{
@@ -19,7 +23,7 @@ const InactiveUserButton: React.FC<ButtonProps> = ({ children, ...props }) => {
       <Button
         style={{ width: 138, justifyContent: 'flex-start' }}
         type="text"
-        icon={<PencilIcon />}
+        icon={icon}
         {...props}
       >
         {children}
@@ -28,4 +32,4 @@ const InactiveUserButton: React.FC<ButtonProps> = ({ children, ...props }) => {
   );
 };
 
-export default InactiveUserButton;
+export default UserTableActionButton;
