@@ -7,5 +7,5 @@ public interface ICategoryProductService
     Task<string> AddCategory(Guid userId, AddCategoryProductDto addShopDto);
     Task<string> EditCategory(Guid userId, Guid categoryId, EditCategoryProduct addShopDto);
     Task<string> DeleteCategory(Guid userId, Guid categoryId);
-    Task<List<CategoryProductResponseModel>> GetAllCategories();
+    Task<List<CategoryProductResponseModel>> GetAllCategories(Guid shopId);
 }

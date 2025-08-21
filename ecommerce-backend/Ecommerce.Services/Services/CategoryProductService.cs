@@ -114,9 +114,9 @@ public class CategoryProductService : ICategoryProductService
         return "Category has been deleted successfully.";
     }
 
-    public async Task<List<CategoryProductResponseModel>> GetAllCategories()
+    public async Task<List<CategoryProductResponseModel>> GetAllCategories(Guid shopId)
     {
-        var query = _categoryProductRepository.FindAll();
+        var query = _categoryProductRepository.FindByCondition(c => c.ShopId == shopId);
 
         var result = _mapper.Map<List<CategoryProductResponseModel>>(query);
         return result;

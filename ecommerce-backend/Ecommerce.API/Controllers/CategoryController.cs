@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Ecommerce.Services.DTOs.Shop;
 using Ecommerce.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -22,7 +23,8 @@ public class CategoryController : ControllerBase
     public async Task<IActionResult> AddCategory([FromBody] AddCategoryProductDto category)
     {
         var userId =
-            Guid.Parse(User.FindFirst("sub")?.Value ?? throw new UnauthorizedAccessException());
+            Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
+                       throw new UnauthorizedAccessException());
 
         var message = await _categoryProductService.AddCategory(userId, category);
         return Ok(new
@@ -31,11 +33,11 @@ public class CategoryController : ControllerBase
         });
     }
 
-    [HttpGet("get-all-categories")]
+    [HttpGet("get-all-categories/{shopId:guid}")]
     [Authorize(Roles = "Super Admin,Admin,Shop")]
-    public async Task<IActionResult> GetAllCategories()
+    public async Task<IActionResult> GetAllCategories(Guid shopId)
     {
-        var result = await _categoryProductService.GetAllCategories();
+        var result = await _categoryProductService.GetAllCategories(shopId);
         return Ok(result);
     }
 
@@ -44,7 +46,8 @@ public class CategoryController : ControllerBase
     public async Task<IActionResult> EditCategory(Guid id, [FromBody] EditCategoryProduct payload)
     {
         var userId =
-            Guid.Parse(User.FindFirst("sub")?.Value ?? throw new UnauthorizedAccessException());
+            Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
+                       throw new UnauthorizedAccessException());
         var message = await _categoryProductService.EditCategory(userId, id, payload);
         return Ok(new { message });
     }
@@ -54,7 +57,8 @@ public class CategoryController : ControllerBase
     public async Task<IActionResult> DeleteCategory(Guid id)
     {
         var userId =
-            Guid.Parse(User.FindFirst("sub")?.Value ?? throw new UnauthorizedAccessException());
+            Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
+                       throw new UnauthorizedAccessException());
         var message = await _categoryProductService.DeleteCategory(userId, id);
         return Ok(new { message });
     }

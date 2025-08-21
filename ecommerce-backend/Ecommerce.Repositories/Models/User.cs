@@ -14,4 +14,7 @@ public class User
     public virtual Role Role { get; set; } = null!;
     public ICollection<TokenUser> TokenUsers { get; set; } = new List<TokenUser>();
     public virtual Shop? Shop { get; set; }
+
+    public virtual ICollection<ProductReview> ProductReviews { get; set; } =
+        new List<ProductReview>();
 }
