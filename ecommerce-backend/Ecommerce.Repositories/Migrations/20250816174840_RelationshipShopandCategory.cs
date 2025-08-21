@@ -8,7 +8,7 @@ namespace Ecommerce.Repositories.Migrations
     /// <inheritdoc />
     public partial class RelationshipShopandCategory : Migration
     {
-        /// <inheritdoc />
+        /// <inheritdoc />k
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<Guid>(

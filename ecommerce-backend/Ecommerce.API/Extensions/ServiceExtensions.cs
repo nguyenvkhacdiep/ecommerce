@@ -70,6 +70,9 @@ public static class ServiceExtensions
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IShopService, ShopService>();
         services.AddScoped<ICategoryProductService, CategoryProductService>();
+        services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<ICartService, CartService>();
         services.AddScoped<IFirebaseStorageService, FirebaseStorageService>();
         services.AddScoped<JwtTokenGenerator>();
     }
@@ -77,12 +80,20 @@ public static class ServiceExtensions
     public static void RepositoryConfiguration(this IServiceCollection services,
         IConfiguration configuration)
     {
+        services.AddScoped<IAuthRepository, AuthRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
-        services.AddScoped<IAuthRepository, AuthRepository>();
         services.AddScoped<ITokenUserRepository, TokenUserRepository>();
         services.AddScoped<IShopRepository, ShopRepository>();
         services.AddScoped<IShopFollowerRepository, ShopFollowerRepository>();
         services.AddScoped<ICategoryProductRepository, CategoryProductRepository>();
+        services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IProductImagesRepository, ProductImagesRepository>();
+        services.AddScoped<IOrderRepository, OrderRepository>();
+        services.AddScoped<ICartRepository, CartRepository>();
+        services.AddScoped<ICartItemRepository, CartItemRepository>();
+        services.AddScoped<IOrderRepository, OrderRepository>();
+        services.AddScoped<IProductReviewRepository, ProductReviewRepository>();
+        services.AddScoped<IProductReviewImageRepository, ProductReviewImageRepository>();
     }
 }

@@ -7,5 +7,5 @@ public class CategoryProduct
     public Guid ShopId { get; set; }
     public virtual Shop Shop { get; set; } = null!;
 
-    public virtual ICollection<Product> Product { get; set; } = new List<Product>();
+    public virtual ICollection<Product> Products { get; set; } = new List<Product>();
 }
