@@ -2,6 +2,7 @@ import axiosInstance from './axiosConfig';
 
 export interface IUploadResponse {
   url: string;
+  fileName: string;
 }
 
 export async function uploadFile(payload: FormData): Promise<IUploadResponse> {

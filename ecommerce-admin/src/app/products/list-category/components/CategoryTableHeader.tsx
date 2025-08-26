@@ -6,12 +6,12 @@ import { debounce } from 'lodash';
 import { useRouter } from 'next/navigation';
 import React, { useMemo, useState } from 'react';
 
-type AccountTableHeaderProps = {
+type CategoryTableHeaderProps = {
   params: PagingRequest;
   setParams: (v: PagingRequest) => void;
 };
 
-const AccountTableHeader: React.FC<AccountTableHeaderProps> = ({ params, setParams }) => {
+const CategoryTableHeader: React.FC<CategoryTableHeaderProps> = ({ params, setParams }) => {
   const router = useRouter();
   const [searchText, setSearchText] = useState<string | undefined>(params.searchKey);
 
@@ -29,15 +29,15 @@ const AccountTableHeader: React.FC<AccountTableHeaderProps> = ({ params, setPara
     debouncedSearch(value);
   };
 
-  const handleAddUserClick = () => {
-    router.push('/account/add-user');
+  const handleAddCategoryClick = () => {
+    router.push('/products/add-category');
   };
 
   return (
     <div className="w-full flex justify-between px-4 py-2">
-      <PrimaryButton onClick={handleAddUserClick}>Add User</PrimaryButton>
+      <PrimaryButton onClick={handleAddCategoryClick}>Add Category</PrimaryButton>
       <Input
-        placeholder="Search by email"
+        placeholder="Search by Category name"
         className="!w-1/5"
         defaultValue={params.searchKey}
         value={searchText}
@@ -48,4 +48,4 @@ const AccountTableHeader: React.FC<AccountTableHeaderProps> = ({ params, setPara
   );
 };
 
-export default AccountTableHeader;
+export default CategoryTableHeader;

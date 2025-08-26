@@ -66,14 +66,24 @@ const links = [
     ),
     children: [
       {
+        key: 'add-product',
+        label: 'Add Product',
+        href: '/products/add-product',
+      },
+      {
         key: 'list-product',
         label: 'List Product',
         href: '/products/list-product',
       },
       {
-        key: 'add-product',
-        label: 'Add Product',
-        href: '/products/add-product',
+        key: 'add-category',
+        label: 'Add Category',
+        href: '/products/add-category',
+      },
+      {
+        key: 'list-category',
+        label: 'List Category',
+        href: '/products/list-category',
       },
     ],
   },

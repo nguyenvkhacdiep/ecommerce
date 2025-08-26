@@ -81,7 +81,7 @@ public class ShopService : IShopService
                 x.Name != null && x.Name.Contains(parameters.SearchKey));
 
         if (string.IsNullOrWhiteSpace(parameters.OrderBy))
-            query = query.OrderByDescending(x => x.CreatedAt).ThenBy(x => x.CreatedAt);
+            query = query.OrderByDescending(x => x.CreatedAt);
         else
             query = query.ApplySort(parameters.OrderBy);
 

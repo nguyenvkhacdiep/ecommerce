@@ -72,7 +72,7 @@ public class ProductController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("/{productId:guid}")]
+    [HttpGet("{productId:guid}")]
     [Authorize]
     public async Task<IActionResult> GetProduct(Guid productId)
     {
@@ -80,7 +80,7 @@ public class ProductController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPatch("/mark-out-of-stock/{productId:guid}")]
+    [HttpPatch("mark-out-of-stock/{productId:guid}")]
     [Authorize]
     public async Task<IActionResult> MarkedOutOfStock(Guid productId)
     {

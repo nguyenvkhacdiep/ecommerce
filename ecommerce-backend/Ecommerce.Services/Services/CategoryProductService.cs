@@ -1,7 +1,9 @@
 using AutoMapper;
 using Ecommerce.Base.Exceptions;
+using Ecommerce.Base.Helpers;
 using Ecommerce.Repositories.Interfaces;
 using Ecommerce.Repositories.Models;
+using Ecommerce.Services.Common;
 using Ecommerce.Services.DTOs.Shop;
 using Ecommerce.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -95,6 +97,7 @@ public class CategoryProductService : ICategoryProductService
     {
         var existingCategory =
             await _categoryProductRepository.FindByCondition(c => c.Id == categoryId)
+                .Include(c => c.Shop)
                 .FirstOrDefaultAsync();
 
         if (existingCategory == null)
@@ -114,11 +117,34 @@ public class CategoryProductService : ICategoryProductService
         return "Category has been deleted successfully.";
     }
 
-    public async Task<List<CategoryProductResponseModel>> GetAllCategories(Guid shopId)
+    public async Task<PageList<CategoryProductResponseModel>> GetAllCategories(Guid shopId,
+        RequestParameters parameters)
     {
         var query = _categoryProductRepository.FindByCondition(c => c.ShopId == shopId);
 
+        if (!string.IsNullOrWhiteSpace(parameters.SearchKey))
+            query = query.Where(x =>
+                x.Name != null && x.Name.Contains(parameters.SearchKey));
+
+        if (string.IsNullOrWhiteSpace(parameters.OrderBy))
+            query = query.OrderByDescending(x => x.Name);
+        else
+            query = query.ApplySort(parameters.OrderBy);
+
         var result = _mapper.Map<List<CategoryProductResponseModel>>(query);
+        return new PageList<CategoryProductResponseModel>(result, query.Count(),
+            parameters.PageNumber,
+            parameters.PageSize);
+    }
+
+    public async Task<CategoryProductResponseModel> GetCategory(Guid categoryId)
+    {
+        var query = await _categoryProductRepository.FindByCondition(c => c.Id == categoryId)
+            .FirstOrDefaultAsync();
+
+        if (query == null) throw new BadRequestException("Category not found.");
+
+        var result = _mapper.Map<CategoryProductResponseModel>(query);
         return result;
     }
 }

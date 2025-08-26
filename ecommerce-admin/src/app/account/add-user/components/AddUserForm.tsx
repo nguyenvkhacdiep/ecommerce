@@ -8,7 +8,7 @@ import { useUploadFile } from '@/hooks/reactQuery/upload/useUploadFile';
 import { useFormChanged } from '@/hooks/useFormChanged';
 import { IUserResponse } from '@/services/auth';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
-import { Flex, FormInstance, GetProp, Input, Select, Upload, UploadProps } from 'antd';
+import { Flex, FormInstance, Input, Select, Upload, UploadProps } from 'antd';
 import FormItem from 'antd/es/form/FormItem';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -87,7 +87,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
     formData.append('type', 'file');
     formData.append('file', info.file.originFileObj as File);
     const response = await mutateAsync(formData);
-    setPrefileName(info.file.name);
+    setPrefileName(response.fileName);
     setImageUrl(response.url);
     form.setFields([{ name: 'urlAvatar', value: response.url, errors: [] }]);
   };

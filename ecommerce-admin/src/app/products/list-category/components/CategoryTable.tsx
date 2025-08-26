@@ -3,15 +3,14 @@
 import React, { useMemo, useState } from 'react';
 import { TableProps } from 'antd';
 import CommonTable from '@/app/components/table/CommonTable';
+import useModalHandler from '@/hooks/useModalHandler';
 import { PagingRequest } from '@/common/type';
 import { ActionItem } from './ActionItem';
 import TableAction from '@/app/components/table/TableAction';
-import ShopTableHeader from './ShopTableHeader';
 import Link from 'next/link';
-import ShopTag from './ShopTag';
-import { IShopResponse } from '@/services/shop';
-import useModalHandler from '@/hooks/useModalHandler';
-import DeleteShopModal from '@/app/shop/components/DeleteShopModal';
+import DeleteCategoryModal from './DeleteCategoryModal';
+import { ICategoryResponse } from '@/services/category';
+import CategoryTableHeader from './CategoryTableHeader';
 
 const COLUMNS: TableProps['columns'] = [
   {
@@ -21,75 +20,57 @@ const COLUMNS: TableProps['columns'] = [
     width: 40,
   },
   {
-    title: 'Shop ID',
+    title: 'Category ID',
     dataIndex: 'id',
     key: 'id',
-    width: '20%',
-    render: (value) => <Link href={`/shop/list-shop/${value}`}>{value}</Link>,
+    width: '25%',
+    render: (value) => <Link href={`/products/list-category/${value}`}>{value}</Link>,
   },
   {
-    title: 'Shop',
+    title: 'Category Name',
     dataIndex: 'name',
     key: 'name',
-    sorter: true,
   },
   {
-    title: 'Phone Number',
-    dataIndex: 'phoneNumber',
-    key: 'phoneNumber',
-    sorter: true,
-  },
-  {
-    title: 'Follows',
-    dataIndex: 'followerCount',
-    key: 'followerCount',
-    sorter: true,
-  },
-  {
-    title: 'Rating',
-    dataIndex: 'rating',
-    key: 'rating',
-  },
-  {
-    title: 'Type',
-    dataIndex: 'type',
-    key: 'type',
-    sorter: true,
-    render: (value) => <ShopTag type={value} />,
+    title: 'Products',
+    key: 'products',
+    render: (_, record) => (
+      <Link href={`/products/list-product?categoryId=${record.id}`}>View Products</Link>
+    ),
   },
 ];
 
 type Props = {
-  list: IShopResponse[];
+  list: ICategoryResponse[];
   total: number;
+  loading: boolean;
+  deletingCategory: boolean;
   params: PagingRequest;
-  loading?: boolean;
-  deletingShop?: boolean;
   setParams: (v: PagingRequest) => void;
-  onDeleteShop: (shopId: string) => Promise<void>;
+  onDeleteCategory: (CategoryId: string) => Promise<void>;
 } & TableProps;
 
-const ShopTable: React.FC<Props> = ({
+const CategoryTable: React.FC<Props> = ({
   list,
   total,
+  loading,
   params,
   setParams,
-  loading,
-  deletingShop = false,
-  onDeleteShop,
+  deletingCategory,
+  onDeleteCategory,
   ...props
 }) => {
   const { open, toggleModal } = useModalHandler();
-  const [selectedRow, setSelectedRow] = useState<IShopResponse>();
+  const [selectedRow, setSelectedRow] = useState<ICategoryResponse>();
 
-  const onDeleteShopTable = (record: IShopResponse) => {
-    toggleModal();
+  const handleDeleteCategory = (record: ICategoryResponse) => {
     setSelectedRow(record);
+    toggleModal();
   };
 
-  const handleDeleteShop = async () => {
+  const handleConfirmDeleteCategory = () => {
     if (selectedRow) {
-      await onDeleteShop(selectedRow.id);
+      onDeleteCategory(selectedRow.id);
       toggleModal();
     }
   };
@@ -101,7 +82,7 @@ const ShopTable: React.FC<Props> = ({
       render: (_: any, record: any) => {
         return (
           <TableAction
-            content={<ActionItem record={record} onDeleteShop={onDeleteShopTable} />}
+            content={<ActionItem record={record} onDeleteCategory={handleDeleteCategory} />}
             trigger="click"
           />
         );
@@ -124,28 +105,29 @@ const ShopTable: React.FC<Props> = ({
   return (
     <>
       <CommonTable
-        loading={loading}
         columns={columns}
         dataSource={convertList}
         total={total}
+        loading={loading}
         params={params}
         setParams={setParams}
+        title={() => <CategoryTableHeader params={params} setParams={setParams} />}
         scroll={{
           y: 'calc(100vh - 390px)',
         }}
-        title={() => <ShopTableHeader params={params} setParams={setParams} />}
+        pagination={false}
         {...props}
       />
       {open && (
-        <DeleteShopModal
+        <DeleteCategoryModal
           open={open}
           onClose={toggleModal}
-          onDeleteShop={handleDeleteShop}
-          loading={deletingShop}
+          onDeleteCategory={handleConfirmDeleteCategory}
+          loading={deletingCategory}
         />
       )}
     </>
   );
 };
 
-export default ShopTable;
+export default CategoryTable;

@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Globalization;
+using AutoMapper;
 using Ecommerce.Repositories.Models;
 using Ecommerce.Services.DTOs;
 using Ecommerce.Services.DTOs.Shop;
@@ -15,7 +16,9 @@ public class MappingProfile : Profile
         CreateMap<User, UserResponseModel>();
         CreateMap<Shop, ShopResponseModel>();
         CreateMap<CategoryProduct, CategoryProductResponseModel>();
-        CreateMap<Product, ProductResponseModel>();
+        CreateMap<Product, ProductResponseModel>().ForMember(dest => dest.FormatPrice,
+            opt => opt.MapFrom(src => src.Price.ToString("C0", new CultureInfo("vi-VN"))));
+        ;
         CreateMap<ProductImages, ProductImagesResponse>();
         CreateMap<Cart, CartResponseModel>();
         CreateMap<CartItem, CartItemResponseDto>()

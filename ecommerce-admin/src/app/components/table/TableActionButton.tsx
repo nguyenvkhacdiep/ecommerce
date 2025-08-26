@@ -8,7 +8,7 @@ type props = ButtonProps & {
   icon?: React.ReactNode;
 };
 
-const UserTableActionButton: React.FC<props> = ({ children, icon = <PencilIcon />, ...props }) => {
+const TableActionButton: React.FC<props> = ({ children, icon = <PencilIcon />, ...props }) => {
   return (
     <ConfigProvider
       theme={{
@@ -32,4 +32,4 @@ const UserTableActionButton: React.FC<props> = ({ children, icon = <PencilIcon /
   );
 };
 
-export default UserTableActionButton;
+export default TableActionButton;

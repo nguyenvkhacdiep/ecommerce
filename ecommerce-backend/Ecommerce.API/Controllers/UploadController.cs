@@ -23,9 +23,10 @@ public class UploadController : ControllerBase
             return BadRequest("No file uploaded");
 
         using var stream = request.File.OpenReadStream();
-        var url = await _firebaseStorage.UploadFileAsync(stream, request.File.FileName, request.File.ContentType);
+        var response = await _firebaseStorage.UploadFileAsync(stream, request.File.FileName,
+            request.File.ContentType);
 
-        return Ok(new { url });
+        return Ok(response);
     }
 
     [HttpDelete("{fileName}")]

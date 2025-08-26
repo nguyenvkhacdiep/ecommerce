@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Ecommerce.Services.Common;
 using Ecommerce.Services.DTOs.Shop;
 using Ecommerce.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -35,9 +36,18 @@ public class CategoryController : ControllerBase
 
     [HttpGet("get-all-categories/{shopId:guid}")]
     [Authorize(Roles = "Super Admin,Admin,Shop")]
-    public async Task<IActionResult> GetAllCategories(Guid shopId)
+    public async Task<IActionResult> GetAllCategories(Guid shopId,
+        [FromQuery] RequestParameters parameters)
     {
-        var result = await _categoryProductService.GetAllCategories(shopId);
+        var result = await _categoryProductService.GetAllCategories(shopId, parameters);
+        return Ok(result);
+    }
+
+    [HttpGet("{categoryId:guid}")]
+    [Authorize(Roles = "Super Admin,Admin,Shop")]
+    public async Task<IActionResult> GetCategory(Guid categoryId)
+    {
+        var result = await _categoryProductService.GetCategory(categoryId);
         return Ok(result);
     }
 
@@ -52,7 +62,7 @@ public class CategoryController : ControllerBase
         return Ok(new { message });
     }
 
-    [HttpDelete("{id:guid}")]
+    [HttpDelete("delete-category/{id:guid}")]
     [Authorize(Roles = "Super Admin,Shop")]
     public async Task<IActionResult> DeleteCategory(Guid id)
     {

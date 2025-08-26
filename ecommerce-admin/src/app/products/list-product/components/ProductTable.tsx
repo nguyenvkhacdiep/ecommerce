@@ -4,13 +4,13 @@ import React, { useMemo, useState } from 'react';
 import { TableProps } from 'antd';
 import CommonTable from '@/app/components/table/CommonTable';
 import useModalHandler from '@/hooks/useModalHandler';
-import { IUserResponse } from '@/services/auth';
 import { PagingRequest } from '@/common/type';
 import { ActionItem } from './ActionItem';
-import CommonTag from '@/app/components/tag/CommonTag';
 import TableAction from '@/app/components/table/TableAction';
-import AccountTableHeader from './AccountTableHeader';
+import ProductTableHeader from './ProductTableHeader';
 import Link from 'next/link';
+import { IProductResponse } from '@/services/product';
+import DeleteProductModal from './DeleteProductModal';
 
 const COLUMNS: TableProps['columns'] = [
   {
@@ -20,69 +20,75 @@ const COLUMNS: TableProps['columns'] = [
     width: 40,
   },
   {
-    title: 'Account ID',
+    title: 'Product ID',
     dataIndex: 'id',
     key: 'id',
-    width: '20%',
-    sorter: true,
-    render: (value) => <Link href={`/account/${value}`}>{value}</Link>,
+    width: '25%',
+    render: (value) => <Link href={`/product/${value}`}>{value}</Link>,
   },
   {
-    title: 'Username',
-    dataIndex: 'username',
-    key: 'username',
-    sorter: true,
-  },
-  {
-    title: 'Email',
-    dataIndex: 'email',
-    key: 'email',
-  },
-  {
-    title: 'Status',
-    dataIndex: 'isActive',
-    key: 'isActive',
-    sorter: true,
-    render: (value) => (
-      <CommonTag color={value ? 'success' : 'error'}>{value ? 'Active' : 'Inactive'}</CommonTag>
-    ),
-  },
-  {
-    title: 'Role',
-    dataIndex: ['role', 'name'],
-    key: 'role',
+    title: 'Product Name',
+    dataIndex: 'name',
+    key: 'name',
     sorter: true,
   },
   {
-    title: 'CreatedAt',
-    dataIndex: 'createdAt',
-    key: 'createdAt',
+    title: 'Price',
+    dataIndex: 'formatPrice',
+    key: 'price',
+  },
+  {
+    title: 'Stock',
+    dataIndex: 'stockQuantity',
+    key: 'stockQuantity',
+  },
+  {
+    title: 'Rating',
+    dataIndex: 'rating',
+    key: 'rating',
+    sorter: true,
+  },
+  {
+    title: 'Sold',
+    dataIndex: 'soldCount',
+    key: 'soldCount',
     sorter: true,
   },
 ];
 
 type Props = {
-  list: IUserResponse[];
+  list: IProductResponse[];
   total: number;
   params: PagingRequest;
+  loading: boolean;
+  deletingProduct: boolean;
   setParams: (v: PagingRequest) => void;
-  onInactiveUser: (userId: string) => void;
+  onDeleteProduct: (productId: string) => Promise<void>;
 } & TableProps;
 
-const AccountTable: React.FC<Props> = ({
+const ProductTable: React.FC<Props> = ({
   list,
   total,
   params,
   setParams,
-  onInactiveUser,
+  loading,
+  deletingProduct,
+  onDeleteProduct,
   ...props
 }) => {
   const { open, toggleModal } = useModalHandler();
-  const [selectedRow, setSelectedRow] = useState<IUserResponse>();
+  const [selectedRow, setSelectedRow] = useState<IProductResponse>();
 
-  const onDeleteAccount = (record: IUserResponse) => () => {};
+  const handleDeleteProduct = (record: IProductResponse) => () => {
+    setSelectedRow(record);
+    toggleModal();
+  };
 
-  const handleConfirmDeleteAccount = () => {};
+  const handleConfirmDeleteProduct = () => {
+    if (selectedRow) {
+      onDeleteProduct(selectedRow.id);
+    }
+  };
 
   const actionColumn = useMemo(() => {
     return {
@@ -91,13 +97,7 @@ const AccountTable: React.FC<Props> = ({
       render: (_: any, record: any) => {
         return (
           <TableAction
-            content={
-              <ActionItem
-                record={record}
-                onDeleteAccount={onDeleteAccount}
-                onInactiveUser={onInactiveUser}
-              />
-            }
+            content={<ActionItem record={record} onDeleteProduct={handleDeleteProduct} />}
             trigger="click"
           />
         );
@@ -125,22 +125,23 @@ const AccountTable: React.FC<Props> = ({
         total={total}
         params={params}
         setParams={setParams}
+        loading={loading}
         scroll={{
           y: 'calc(100vh - 390px)',
         }}
-        title={() => <AccountTableHeader params={params} setParams={setParams} />}
+        title={() => <ProductTableHeader params={params} setParams={setParams} />}
         {...props}
       />
-      {/* {!!selectedRow && (
-        <DeleteAccountModal
+      {open && (
+        <DeleteProductModal
           open={open}
-          data={selectedAccountDetail}
-          onCancel={toggleModal}
-          onOk={handleConfirmDeleteAccount}
+          onClose={toggleModal}
+          onDeleteProduct={handleConfirmDeleteProduct}
+          loading={deletingProduct}
         />
-      )} */}
+      )}
     </>
   );
 };
 
-export default AccountTable;
+export default ProductTable;

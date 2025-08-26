@@ -2,7 +2,7 @@ import DangerActionButton from '@/app/components/button/DangerActionButton';
 import UpdateActionButton from '@/app/components/button/UpdateActionButton';
 import { FC } from 'react';
 import { IUserResponse } from '@/services/auth';
-import UserTableActionButton from './UserTableActionButton';
+import UserTableActionButton from '../../components/table/TableActionButton';
 import { ShoppingCartOutlined } from '@ant-design/icons';
 
 type ActionItemProp = {
